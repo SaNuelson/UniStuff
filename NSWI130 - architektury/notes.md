@@ -240,8 +240,48 @@ Software Architectures
 ### Quality Attributes
 
 - a measurable or testable property of a system that is used to indicate how well the system satisfies a quality requirement of a stakeholder
+- can be split into
+  - **System QA**
+    - also called **"hard"** QA, as they are the most improtant from the view of SW architects
+    - can be further split into
+      - **Run-time QA**
+        - "how well the system behaves in run-time"
+        - e.g., **availability, perfromance, security, usability**
+      - **Design-time QA**
+        - e.g., **modifiablity, portability, testability, reusabilit, integrability**
+  - **Bussiness QA**
+    - also called **"soft"** QA, not related to the quality of the system, but how well it fits into the environment
+  - **Architectural QA**
+    - also called **"meta"** QA
+    - related to quality of architectural design and documentation
+    - more important to SW architects and dev team than users and customers
+    - can be for example
+      - **correctness**
+        - no mistakes or contradictions in the AD
+      - **completeness**
+        - that AD covers all requirements
+      - **buildability**
+        - that system can be finished in the desired time and budget
+      - **conceptual integrity**
+        - that the whole architecure meets some standards/theme
+
 - can be of types
   - **Performance QA**
     - "how long does it take for system to respond to requests"
-    - architectural aspect
+    - can depend on
+      - amount of communication between components (serialization/deserialization)
+      - amount of functionality in individual components (bottleneck)
+      - where components are allocated (weak hardware)
+      - implemented algorithms (bad time complexity)
   - **Modifiability QA**
+    - "how easily a system can be extended, parts removed or changed"
+    - can depend on
+      - how well is separation of concerns implemented (coupling)
+      - coding techniques (badly maintained / undocumented code)
+  - **Usability QA**
+    - "how easily can user accomplish a desired task"
+    - **not** to be confused with **user experience**
+    - can depend on
+      - how well UI is designed
+      - presnce of optional functionality (undo, copy/paste, config save)
+    - 
