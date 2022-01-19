@@ -265,7 +265,51 @@ Software Architectures
       - **conceptual integrity**
         - that the whole architecure meets some standards/theme
 
-- can be of types
+### System QA in detail
+![Quality Attribute Scenario](res/quality_attribute_scenario.png)
+  - **Availability QA**
+    - "how well can system handle problems"
+    - computed as $\frac{\textrm{mean time to failure}}{\textrm{mean time to failure} + \textrm{mean time to repair}}$
+    - **failure** occurs when system no longer delivers a service that is consisten with its specification and which is **observable** by users or other systems
+    - on the other hand, a **fault** is **not observable** and is **not an availability** issue, but it can lead to a failure
+    - techniques to improve it are:
+      - **Fault recovery**
+        - stop faults from becoming failures
+      - **Fault repair**
+        - stop faults from happening in first place
+    - parts of the scenario are:
+      - **Source** is the **observer**, either 
+        - **Internal** 
+          - observed by other component
+          - it's still a fault, system reacts to fault
+        - **External** 
+          - observed by user or other system
+          - already observed, system reacts to failure
+      - **Artifact** is the **failed component** (the one where failure is observed, not necessarily one which caused the initial fault)
+      - **Stimulus** is the **observation** of a fault, can be:
+         - **Omission** - component doesn't respond
+         - **Crash** - component repeatedly doesn't respond
+         - **Incorrect timing** - component responds either early or late
+         - **Incorrect response** - component responds in time but incorrectly (corrupted data, wrong format...)
+      - **Environment** are the **conditions of the artifact** and its **surrounding environment** under which the fault and its observation is considered
+        - startup/shutdown
+        - normal/overloaded operation
+        - first/repeated fault
+      - **Response** is the **reaction** of the system, masking or recovering, optionally logging, notificating, disabling the artifact...
+      - **Measure** is either
+        - probability of scenario occuring
+        - time required to detect and repair
+        - time the system or artifact is hindered
+    - ways to improve this are:
+      - **Detect faults**
+        - **ping** - hierarchical echo, testing reachability and delay
+        - **heartbeat** - periodic echo requesting response with health data of other component
+        - can be moved to separate component called **Monitor**
+  - **Modifiability QA**
+    - "how easily a system can be extended, parts removed or changed"
+    - can depend on
+      - how well is separation of concerns implemented (coupling)
+      - coding techniques (badly maintained / undocumented code)
   - **Performance QA**
     - "how long does it take for system to respond to requests"
     - can depend on
@@ -273,11 +317,10 @@ Software Architectures
       - amount of functionality in individual components (bottleneck)
       - where components are allocated (weak hardware)
       - implemented algorithms (bad time complexity)
-  - **Modifiability QA**
-    - "how easily a system can be extended, parts removed or changed"
-    - can depend on
-      - how well is separation of concerns implemented (coupling)
-      - coding techniques (badly maintained / undocumented code)
+  - **Scalability QA**
+  - **Security QA**
+  - **Interoperability QA**
+  - **Testability QA**
   - **Usability QA**
     - "how easily can user accomplish a desired task"
     - **not** to be confused with **user experience**
