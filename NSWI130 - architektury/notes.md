@@ -669,4 +669,84 @@ Software Architectures
         - **System model**
           - e.g. loading bar
 
-### Domain-driven architecture
+### Architectural pattern
+
+- recommended architectural practice which is a well-known solution to a well-known architectural problem caused by some recurring common situation
+- some examples are:
+  - **Observer**
+  - **Router**
+  - **Load balancer** - forwarding requests to even out load
+  - **Broker** - crossroad for requests
+  - **API**
+  - **Layer pattern**
+    - split modules into layer, where each layer offers a cohesive set of services
+    - each module depends on modules from only layer directly above
+
+### Domain-driven pattern
+
+- centered around the **problem domain**
+- separation of **technical complexities** from the **complexities** of the **problem domain**
+- presentation, persistence and domain logic responsibilities usually change at different rates and for different reasons
+- can accommodate change without causing an undesired effect to unrelated modules.
+- the **domain layer** is at the **center** of the architecture
+  - contains all the logic important for the business
+  - conceptual **abstract view** of the problem domain created to fulfill the need of the application use-cases
+  - **agnostic** to the technicalities of the **other parts** of the system which are responsible for communication with human users or with other systems or for data stores
+  - focused only on domain rules, domain concepts and workflows
+  - free from any technical details, including model persistence
+  - can evolve **independently** of other parts and the façade ensures that changes to the domain logic do not affect the other parts
+- on top of the domain layer we have the **application service layer**
+  - represents application use cases and application behavior
+  - use cases are implemented as **application services** at this layer
+  - ignorant to what consumes its functionality
+  - **exposes what** the system does but **hides how** it does it
+  - includes **hydrating** of domain objects from the **database**, **validating** user input, mapping it to domain objects, **delegating** to domain objects to perform some domain work and collecting business decisions made at the domain layer
+  - includes **delegating** to other layers
+  - should be procedural and thin
+  - defines its own interfaces which are implemented by the infrastructural layers
+- on top of app service layer are **infrastructura layers**
+  - used by the application layer
+  - provide the **technical logic** which enables the application to function
+  - for example, enable the application to be consumed by human users via a **GUI** or by applications via an **API**
+  - also responsible for the **persisting** the state of domain objects, **logging**, **security**, **notification** and **integration**.
+- can be applied in any SW system but isn't always recommended, as it may be overly complicated
+
+### Three-tier pattern
+- three parts 
+  - **presentation** tier 
+    - front-end layer
+    - provides UI
+    - display information to and collect information from the user
+  - **application** tier
+    - business logic
+  - **data** tier
+- each tier can be developed by a separate team of specialists
+- each tier can run on a separate operating system or server platform
+- each tier can run on at least one dedicated hardware or virtual server
+- improves scalability as the tiers can be scaled independently of the others
+- improves availability as an outage in one tier can be masked more easily
+- improves security because the presentation and data tier cannot communicate directly
+- modifiability and integrability is also improved because the separation increases cohesion and reduces coupling
+- code is built quickly and testing is also straightforward
+- concentrates only on the technical challenges of software development, deployment and maintenance
+- may quickly lead to a mismatch between the terminology and logic of the code
+invented by the developers and the terminology and logic of the business people who use the system, who have requirements on the system or who pay for the system
+- terminology and the logic of the business is not visible in the code
+- it is present in the code but in its own technical way invented by the  developers
+
+### Service-oriented architecture.
+- 8 key principles which need to be followed:
+  - **Standardization** means that there are organizational standards for defining service contracts starting in naming conventions, data formats and exchanged data semantics
+  - **Loose-coupling** is the concept we are already familiar with from the lecture about maintainability
+  - **Abstraction** means that only information about a service is published which is absolutely necessary for the consumers
+  - **Reusability** means that you design a service with its possible future reusability in mind
+  - **Autonomy** means that services are autonomous in controlling their runtime and design
+  - **Statelessness** means that services cannot maintain state
+  - **Discoverability** means that services can be located through a service repository
+  - **Composability** means that when a new service is being designed and built we first try to compose it from other existing services
+  
+### Microservice pattern
+- must be **strictly autonomous** so having their own database is a must
+- typically **smaller** than **services** corresponding to whole bounded contexts
+- because they are so small, **data consistency** becomes really a problem
+- needs **sagas**
