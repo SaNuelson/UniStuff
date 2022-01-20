@@ -300,16 +300,136 @@ Software Architectures
         - probability of scenario occuring
         - time required to detect and repair
         - time the system or artifact is hindered
-    - ways to improve this are:
-      - **Detect faults**
-        - **ping** - hierarchical echo, testing reachability and delay
-        - **heartbeat** - periodic echo requesting response with health data of other component
-        - can be moved to separate component called **Monitor**
+    - **tactics** for improving availability are:
+      - **Fault detection**
+        - **Ping** - hierarchical echo, testing reachability and delay
+        - **Heartbeat** - periodic echo requesting response with health data of other component
+        - can be moved to separate component called **Monitor**, which checks health of other components and hardware
+        ![Monitor component](res/monitor.png)
+        - **Timestamps** - echos containing timestamps, can detect timing and response faults, especially important in distributed systems, e.g., Lamport timestamps
+        - **Timeout** - simpler than timestamps, detects timing faults on top of omissions and crashes.
+        - **Voting (N-modular redundancy)**
+          - detects incorrect responses by voting responses of N components
+          - can have strategies:
+            - **Replication** - e.g., thermometers
+            - **Functional** - same inteface, different implementation (e.g., multiple algorithms)
+            - **Analytic** - completely different components (e.g., altitude calculated using barometric pressure, radar altimeter, GPS), requires sophisticated voter
+      - **Fault recovery**
+        - **Preparation and repair tactics**
+          - try to recover artifacts
+          - can be:
+            - **Redundancy**
+              - backup copies of components needing to be available
+              - can be:
+                - **Active / hot spare** - backup components perform the same ops in tandem, take over when active fails - no delay
+                - **Stand-by / warm spare** - backup components are updated by the active component, when it fails, one takes over from the last update - slight delay
+                - **Passive / cold spare** - backup components are off, once active fails, another is turned on and starts computation from the beginning - biggest delay
+            - **Rollback**
+              - create checkpoints (at regular times or after important processes)
+              - component reverts upon reaching an invalid state
+              - often expensive, impossible in distributed systems
+            - **Saga**
+              - "rollback for distributed systems"
+              - processes are connected to transactions which are reverted as a whole (analogic to database transactions)
+            - **Retry**
+              - assumes fault will not reappear upon retrying
+              - used in networks where faults are common and often caused by temporary sources
+            - **Ignore**
+              - e.g., DoS counter-measure
+            - **Degradation**
+              - shut down non-critical system functions upon fault, maintain critical parts
+        - **Reintroduction tactics**
+          - try to recover failed component
+          - can be:
+            - **Shadow**
+              - operate failed one in "shadow mode" for a predefined amount of time, where it changes its behaviour (e.g., use cached data if external source if unavailable)
+            - **State resynchronization**
+              - backup components are synced with active one, when out of sync, they're resynced
+            - **Escalated restart**
+              - component's unprotected memory is freed or all memory is freed or whole system is restarted
+        - **Fault prevention tactics**
+          - can be:
+            - **Removal of service**
+              - preventive restart or reconfig of a component to scrub latent faults, e.g., memory leaks
+            - **Transactions**
+              - ops in system are executed in transactions with ACID properties (e.g., 2PC protocol)
+            - **Predictive model**
+              - monitor records outputs of components and tries to evaluate their health
+    - can be tested using **Chaos engineering** (chaos monkeys), which randomly turn off parts of dist. systems, trying if system can recover
   - **Modifiability QA**
     - "how easily a system can be extended, parts removed or changed"
     - can depend on
       - how well is separation of concerns implemented (coupling)
       - coding techniques (badly maintained / undocumented code)
+    - parts of the scenario are:
+      - **Source** is the **actor** making the modification
+      - **Artifact** is a **module/component** which needs to be changed
+      - **Stimulus** is the **change** being made
+      - **Environment** is **when** the change is made (**runtime/design time**)
+      - **Response** is **making, testing and deploying** the change
+      - **Measure** are **time and money** necessary for the change, or number of artifacts, new technical debt...
+    - important concepts which affect modifiability are:
+      - **Module coupling**
+        - how modules overlap in responsibilities
+        - can be:
+          - **tight** meaning high probability of modification affecting other module
+          - **loose** meaning the opposite
+        - based on dependencies:
+          - **Data dep.** - A passes data to B, therefore B is dependent of A's formatting
+          - **Control dep.** - A controls B in terms of the flow of messages
+          - **Content dep.** - A depends on B's internal functionality (e.g., validating incoming data)
+          - **Quality/QoS dep.** - B expects certain quality of data from A
+          - **Existence dep.** - B relies on existence of A.
+      - **Module cohesion**
+        - how responsibilities of a module belong together
+        - can be **high** and **low**
+        - can be of types:
+          - **Coincidental** - arbitrary
+          - **Logical** - e.g., all functions validate data
+          - **Temporal** - related in time, e.g., module with processes which happen at the same time
+          - **Procedural** - responsibilities happen in sequence (temporal cohesion but procedures are related)
+          - **Informational** - reponsibilities work on the same data
+          - **Sequential** - responsibilities create a pipeline (output of one is input of another)
+          - **Functional** - responsibilities are related by a single well-defined task
+    - **loose coupling** + **high cohesion** => **high modifiability**
+    - **tactics** for improving modifiability are:
+      - **Decomposition (cohesion-focused)**
+        - moving responsibilities between modules
+        - splitting low-cohesion modules to submodules
+        - can be:
+          - **Semantic**
+            - tries to achieve **functional cohesion**
+            - split unrelated responsibilities in submodules or move to other modules
+          - **Based on anticipated changes**
+            - tries to anticipate changes via modifiability scenarios
+            - separate responsibilities prone to change to "protect" others
+          - **Based on shared responsibilities**
+            - tries to find shared responsibility in multiple modules and separating it in its own module
+      - **Coupling-focused**
+        - tries to prevent ripple effect (modification cascading due to dependencies)
+        - can be:
+          - **Dependencies restriction**
+            - try to minimize number of modules some module is dependent on
+            - e.g., by layered architecture (module depends only on those in higher level)
+          - **Information hiding / encapsulation**
+            - introducing explicit interfaces to separate modules
+          - **Intermediary translator**
+            - new module responsible for translation of messages or calls between modules
+            - can be:
+              - **Anticorruption layer**
+                - creates **anti-corruption layer** - module's internal logic doesn't have to be corrupted (conform) to the other module's logic
+              - **Service layer / open host**
+                - translator layer built around an unstable module to keep other modules from being corrupted
+              - **Message broker**
+                - used for highly dependent subsystem
+                - all modules instead communicate with broker, which translates and forwards messages further
+          - **Preservation**
+            - use **versioning** for **backwards compatibility**, leave old interfaces and mark as **deprecated**
+          - **Refactoring**
+            - lowering technical debt by manually reworking the modules
+          - **Defer binding**
+            - try to design in such a way that changes can be done "by computers"
+            - e.g., use GUI designer apps, scripts for building software like Makefile, automated deployment, use of DLLs, etc.
   - **Performance QA**
     - "how long does it take for system to respond to requests"
     - can depend on
@@ -317,14 +437,236 @@ Software Architectures
       - amount of functionality in individual components (bottleneck)
       - where components are allocated (weak hardware)
       - implemented algorithms (bad time complexity)
+    - parts of the scenario are:
+      - **Source** can be
+        - **Internal** - another component of the system
+        - **External** - user, another system or the passage of time
+      - **Artifact** is the whole **system** or some of its runtime **components**
+      - **Stimulus** is a **request stream** which must be satisfied in a **specified time**. which can be
+        - **Periodic** - arrive predictably at regular time intervals
+        - **Stochastic** - arrive according to some probability distribution
+        - **Sporadic** - arrive unpredictably
+      - **Environment** is the **operation mode** when the event occurs, e.g., normal mode, emergency mode, at peak or overloaded
+      - **Response** is that the **system processes** the requests
+      - **Measure** can be
+        - **Latency** - time between request and response
+        - **Jitter** - variation of latency
+        - **Miss rate** - ratio of request not processed
+      - **Tactics** to improve performance are:
+        - **Control resource demand**
+          - try to minimize demand on available resources
+          - can be:
+            - **Manage sampling rate**
+              - e.g., reduce sampling frequency in a monitoring system
+              - can result in fidelitty loss
+            - **Limit event response**
+              - incoming requests are queued and sequentially processed
+              - if queue is filled, new requests can either be dropped (becomes availability problem) or treated in some way (e.g., setting environment to overloaded)
+            - **Prioritization**
+              - variation of limitting event response, full queue is filtered based on some definition of priority
+            - **Bound execution times**
+              - requests of which computations exceed some timeout are dropped and execution stopped
+            - **Improve algorithms**
+              - try to decrease latency by improving critical areas
+            - **Improve architecture**
+              - e.g.
+                - use binary formats (speed up serialization/deserialization) 
+                - reduce number of requests (improve API)
+                - remove intermediary components (may worsen modifiability)
+                - component co-location (move components on the same hardware or close by)
+                - edge computing 
+        - **Manage resources**
+          - try to improve effectiveness of available resources
+          - can be:
+            - **Increase resources**
+              - ***Harder, better, faster, stronger***
+              - also not doing dumb stuff (like not using GPU for some computation)
+            - **Concurrency**
+              - processing different streams of events on different threads
+              - introduce scheduling policies to maximize either fairness, throughput or other goals
+            - **Replicas**
+              - create replicas of bottleneck components and use load balancer to distribute incoming traffic
+            - **Caching**
+              - keeping frequently accessed data in closer memory to avoid repetituous reading or requesting data
   - **Scalability QA**
+    - ability of software system to handle tasks as it grows in size (its userbase, requests per time, amount of data managed...)
+    - nowadays, scalability also considers availability, performance and modifiability change
+    - parts of the scenario are:
+      - **Source** is the **reason** for growth (userbase which grows, other system which increases request throughput, stakeholders which require growth)
+      - **Artifact** is the **module** or **component** which needs o scale
+      - **Stimulus** is the **aspect** which grows
+      - **Environment** is **when** it scaling happens (runtime, build time, initiation time, design time)
+      - **Response** is the **fact** that artifact is scaled
+      - **Measure** specifies **how** to show scenario is fulfilled (ensure that modifiability, performance, avaiability are satisfied, plus time it takes to scale)
+    - **Tactics** to improve scalability are on so-called **scale cube**:
+      - **X-axis**
+        - **increasing instances** of components behind **load balancer**
+        - works for availability and performance
+      - **Y-axis (functional decomposition)**
+        - tries to split application to a set of loosely-coupled components separated into **microservices**
+        - it is close to modifiability tactics
+      - **Z-axis**
+        - **increasing instances** of components which work on **partitions** of the overall data behind a **router**
   - **Security QA**
+    - ability of a system to protect data and information from unauthorized access while still providing access to people and system that are authorized
+    - unauthorized attempt is called an **attack**
+    - securita **goals** are:
+      - **Confidentiality**
+        - data or services are protected from unauthorized access
+      - **Integrity**
+        - data or services are not subject to unauthorized manipulation
+      - **Availability**
+        - system will be available for legitimate use
+      - **Authentication**
+        - system can verify identity of party in a transaction
+      - **Non-repudiation**
+        - system can guarantee that the sender of a message cannot later deny having sent the message, and that the recipient cannot deny having received the message
+      - **Authorization**
+        - system can grant user their privileges to perform a task
+    - parts of the scenario are:
+      - **Source** is an **attacker** (human or other system)
+      - **Artifact** is a system **service**, runtime **component**, system **resource**, **data** within, produced or consumed by the system
+      - **Stimulus** is the **attack**
+      - **Environment** are the **conditions** under which the attack takes place (online/offline, internal/external attack)
+      - **Response** is a fact that **confidentility, integrity and availability** of the artifact is preserved, additionally that attacker is identified
+      - **Measure** includes how much was system **compromised**, amount of **time** it took to recognize the attack, stop it and/or recover
+    - **Tactics** to improve security are:
+      - **Detect attack**
+        - try to recognize an attack is taking place
+        - **Detect intrusion**
+          - compare network traffic or service request patterns to a set of signatures or known patterns of malicious behaviour
+        - **Detect DoS**
+          - similarly to intrusion detection, watch out for unusual behaviour
+        - **Verify message integrity**
+          - verify messages using checksums, hash values, electronic stamps or signatures
+      - **Resist attack**
+        - prevent an ongoing attack and/or minimize its impact
+        - **Actor authentication**
+          - verify that user is who they claim to be, e.g. using using login credentials, IP, biometrics...
+        - **Actor authorization**
+          - ensure that user has rights to access or modify data or services
+        - **Limit access**
+          - limit parts of the system to a specific group of users/external systems
+        - **Limit exposure**
+          - limit services available to a single host to minimize potential damage, e.g. concealing unnecessary information
+        - **Data encryption**
+          - using encryption to data or communication
+        - **Separate data entities**
+          - e.g. separate data based on confidentiality
+      - **Recover from attack**
+        - attempt to receover from a successful attack
+        - **Restore state**
+          - analogic to availability tactics, as attack becomes a failure
+          - e.g., data backups
+        - **Attacker identification**
+          - e.g. audit trails
   - **Interoperability QA**
+    - the degree to which **two or more systems** can usefully exchange meaningful information via their interfaces in a given context
+    - **Levels** of interoperability are:
+      - **Technical**
+        - systems share a set of protocols enabling them to communicate
+      - **Syntactic**
+        - systems share structural patterns which enable them to exchange data readable by both
+      - **Semantic**
+        - system share the same meaning and interpretation of transferred data
+    - parts of the scenario are:
+      - **Source** is the **other system** with which our system tries to communicate
+      - **Artifact** is **our system** or its part which need to be interoperable with others
+      - **Stimulus** is a **request** to exchange information between systems
+      - **Environment** specifies whether systems **know** about each other's existence and location **at design time** or need to connect **dynamically** at runtime
+      - **Response** is that the **request** to interoperate **results** in the **exchange** of information 
+      - **Measure** can be the **percentage** of correctly exchanged information
+    - **Tactics** to improve interoperability are:
+      - **Technical**
+        - **Shared network protocol and communication principles**
+          - nowadays is almost always REST
+        - **Technical interoperability broker**
+          - in case one system doesn't use REST but SOAP or WSDL, broker is used for translation
+        - **Directory service**
+          - if systems are known at design time but not their locations, directory service searches a driectory of known systems and their available interfaces, provides technical information about where to locate them
+      - **Syntactic**
+        - **Standard format to enforce shared syntax**
+          - many used nowadays in different fields such as SKOS for organizations systems, DCV for statistical data cubes, HL7 FHIR for health care data, DATEX II for traffic data, Schema.org for strucutred data on web pages
+          - again a **broker** can be used instead
+      - **Semantic**
+        - **Standard format to enforce shared semantics**
+          - similarly there are many widely used formats
+        - **Ontologies to properly define semantics**
+          - uses shared conceptualization of a given domain expressed in a machine readable form as a formal graph of semantic concepts and semantic relationships between them
+        - **Identity management**
+          - tries to take advantage of IDs of individual entities that are ideally centrally managed globally, e.g., GS1, which uses EAN codes.
+          - can use **broker** to bind local identifiers to the global ones
   - **Testability QA**
+    - refers to the ease with which software can be made to demonstrate its faults through testing
+    - in other words, high testability of a system means that if there is a fault present in it, it fails tests as soon as possible
+    - parts of the scenario are:
+      - **Source** is the one who performs the test (unit tester, integration tester, system tester, acceptance tester, end user, automated tester)
+      - **Artifact** is the **portion** of the system being tested
+      - **Stimulus** is the **set of tests** which are executed by the source to test the artifact
+      - **Environment** specifies **when** the test happens (development time, integration testing, system testing, deployment, runtime)
+      - **Response** is that when the tester tests the artifact using the stimulus in the environment, the system is expected to be controllable so that it is possible to perform desired tests, the results from the tests can be observed and failures easily identified when there are some
+      - **Measure** represents how easily the system gave up its faults during testing
+    - **Tactics** to improve testability:
+      - **Control and observe system state**
+        - make components maintain some sort of state information
+        - can be:
+          - **Specialized interfaces**
+            - adding testing-exclusive interfaces which enable testers easier testing
+            - e.g., getter functions to retrieve private data valuable for test checks
+          - **Record/playback**
+            - if a state causing a fault is difficult to recreate
+            - it records the state whn it happens and is able to recreate it directly
+          - **Localize state storage**
+            - store states in a persistent storage for easier retrieval
+          - **Abstract data sources**
+            - abstract data source interfaces to be able to plugin mockup data sources
+          - **Sandbox**
+            - isolating a component from the system for easier experimentation
+      - **Limiting complexity in the system's design**
+        - can be:
+          - **Limit structural complexity**
+            - avoids or resolves cyclic dependencies between components, isolating and encapsulating dependencies on the external environment, and reducing dependencies between components and modules in general
+            - similar to loose coupling and high cohesion
+          - **Limit nondeterminism**
+            - in cases such as multi-threaded environment
   - **Usability QA**
     - "how easily can user accomplish a desired task"
     - **not** to be confused with **user experience**
-    - can depend on
-      - how well UI is designed
-      - presnce of optional functionality (undo, copy/paste, config save)
-    - 
+    - **Areas** of usability are:
+      - **Learning system features**
+        - how to make it easier for new user to learn how to use the system
+        - e.g. help section, clear layout
+      - **Using system efficiently**
+        - how can system make users actions more efficient
+        - e.g. multi-select
+      - **Minimizing impact of errors**
+        - how can users errors have minimal impact
+        - e.g. undo, autosave, emergency save
+      - **Adapting to user needs**
+        - how can system adapt to make user's tasks easier
+        - e.g. autofill inputs based on previous data
+      - **Increasing confidence and satisfaction**
+        - how can system ensure user confidence
+        - e.g. loading bar
+    - parts of the scenario are:
+      - **Source** is the **user** trying to accomplish a task
+      - **Artifact** is the whole **system**, its **component** or **feature** user is interacting with
+      - **Stimulus** is that the user tries to use the system **efficiently** or **learns** to use the system
+      - **Environment** is usually **runtime**, alternatively **training mode**
+      - **Response** is that the system **helps** the user either to learn or to finish the task
+      - **Measure** is **task time**, **number of errors**, **user satisfaction**, **gain of user knowledge**, **ration of successful operations** or **amount of time or data lost** upon user error
+    - **Tactics** to improve usability are:
+      - **User's initiative**
+        - **Cancel** - cancel request, free resources
+        - **Pause/resume** - temporarily free resources, reacquire after
+        - **Undo** - keep track of changes, rollback on undo, reapply on redo
+        - **Aggregate** - group items to apply action on each
+      - **System's initiative**
+        - **Task model**
+          - e.g. grammatical model to fix typos
+        - **User model**
+          - e.g. autofill forms, emphasize most frequently used tools
+        - **System model**
+          - e.g. loading bar
+
+### Domain-driven architecture
