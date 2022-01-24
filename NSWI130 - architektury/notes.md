@@ -690,7 +690,7 @@ Software Architectures
 - can accommodate change without causing an undesired effect to unrelated modules.
 - the **domain layer** is at the **center** of the architecture
   - contains all the logic important for the business
-  - conceptual **abstract view** of the problem domain created to fulfill the need of the application use-cases
+  - conceptual **abstract view** of the problem domain created to fulfill the need of the appli cation use-cases
   - **agnostic** to the technicalities of the **other parts** of the system which are responsible for communication with human users or with other systems or for data stores
   - focused only on domain rules, domain concepts and workflows
   - free from any technical details, including model persistence
