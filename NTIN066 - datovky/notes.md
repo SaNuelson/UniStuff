@@ -33,6 +33,21 @@ In other words, amortized complexity says what's the upper bound of operation co
 We claim that **amortized cost** $A = 3$ ($k$ operations take $\le 3k$ time).
 Further, the **real cost** $R$ is at most $A$.
 
+## Weight-balanced tree
+
+- Define:
+  - $l(v)$ - left child of vertex $v$
+  - $r(v)$ - right child of vertex $v$
+  - $s(v)$ - number of vertices in subtree with root $v$ (incl. $v$)
+- Then:
+  - tree is $\alpha$-weight-balanced iff $\forall v:s(l(v)) \le \alpha s(v) \wedge s(r(v)) \le \alpha s(v)$
+- we consider case $\alpha = \frac{2}{3}$
+- depth $d \le \log_{2/3}\frac{1}{n} = \log_{3/2}n \in O(\log n)$
+  - because:
+    - consider path from root to some leaf
+    - at maximum, each next step goes into subtree of size $\frac{2}{3}s(v)$
+    - in such case in leaf we reach subtree of size $\left(\frac{2}{3}\right)^d n = 1$
+
 ## Splay trees
 
 ## (a,b)-trees
@@ -457,3 +472,87 @@ Insert(x):
 
 - binary search $P$ in sorted suffix array in time $O(n \log m)
   - $\log m$ pivots with at most $n$ chars comparison
+
+### Budovanie suffixového poľa
+
+- možno vybudovať pomocou **prefix doubling algoritmu** 
+  - definujme zotriedenie $\gamma \le_k \delta \Leftrightarrow \gamma[0..k] \le \delta[0..k]$
+    - analogicky pre rovnosť
+    - teda sú k-rovné/menšie, práve keď ich prefixy dĺžky $k$ sú rovné/menšie
+  - následne vykonáme $O(\log m)$ prechodov, v ktorých zoradíme sufixy podľa ich prefixov dĺžky $k = 2^i$
+  - $i$-ty prechod teda usporiada sufixy podľa $\le_{2^i}$
+  - v $1$. prechode zoradíme sufixy podľa ich prvého znaku pomocou nejakého sort algoritmu v čase $O(m \log m)$
+  - v $i+1$. kroku máme sufixy zoradené podľa $\le_{2^i}$, chceme zoradiť podľa $\le_{2^{i+1}}$
+    - tu možno použiť práve fakt, že slová na sebe závisia.
+    - $
+  a_i \le_{2k} a_j \Leftrightarrow (a_i \le_k a_j) \vee ((a_i =_k a_j) \wedge (a_{i+k} \le_k a_{j+k}))$
+    - teda, 2 nezoradené sufixy možno zoradiť rekurzívne, keďže bez prefixov sú to "iné sufixy" toho istého slova, ktoré sú už podľa $\le_k$ zoradené
+
+> Example:  
+> $T = tatar$  
+> suffixes $= [tatar, atar, tar, ar, r, \lambda]$  
+> - $i = 1$:
+>   - $\lambda\le_1\{atar,ar\}\le_1r\le_1\{tatar, tar\}$
+> - $i = 2$:
+>   - $\lambda \le_2 ar \le_2 atar \le_2 r \le_2 \{tatar, tar\}$
+>     - $ar \le_2 atar \Leftarrow (ar =_1 atar) \wedge (r \le_1 tar)$
+> - $i = 3$:
+>   - $\lambda \le_4 ar \le_4 atar \le_4 r \le_4 tar \le_4 tatar$
+>     - $tar \le_4 tatar \Leftarrow (tar =_2 tatar) \wedge (r \le_2 tar)$
+
+- teda potrebujeme $O(\log m)$ prechodov, v každom sortovať v čase $O(m \log m)$
+- dokopy $O(m \log^2 m)$
+- to možno vylepšiť pomocou [Karp Miller Rosenberg](https://dl.acm.org/doi/10.1145/800152.804905) bucket sortom
+  - tým znížime čas sortovania na $O(m)$, teda celkovo na $O(m \log m)$
+
+# Parallelism
+
+- multi-processing environment
+
+## Locks
+
+### Race conditions
+
+- issue caused by unfortunate ordering of operations of muiltiple processes
+  ```
+  proc GlobalInc
+  1. t <- cnt
+  2. t <- t + 1
+  3. cnt <- t
+  ```
+  - for 2 processes A,B the order of operations (A1, B1, B2, A2, B3) results in B having `cnt` incremented by 2
+
+### Mutex
+
+- used to resolved race conditions
+- also called **synchronization primitives**, common of which is **mutex** (mutual exclusion, or simply lock)
+  - mutex supports operations:
+    - Lock
+      - if unlocked, lock
+      - if already locked, first wait until unlocked (expected to be done by the "locker")
+    - Unlock
+      - if locked, unlock
+      - if unlocked, crash (expected not to happen at all)
+- typically an instance of data structure has its own mutex. This makes operations on top of it **atomic** - once initiated, cannot be interrupted by other processes
+
+### Deadlock
+
+- issue potentially caused by mutexes
+- caused by specific sequences of atomic operations
+  ```
+  proc AtomicMove
+  1. lock(A)
+  2. lock(B)
+  3. A.delete(x)
+  4. B.insert(x)
+  5. unlock(B)
+  6. unlock(A)
+  ```
+- for 2 processes X,Y in which X wants to move from A to B, Y wants to move from B to A, the sequence (X1, Y1) results in the 2 processes blocking each other
+- these can be recognized by **dependency graphs**
+  - directed graphs
+  - vertices are processes
+  - edge $(i,j)$ show that process $i$ waiting for mutex locked by $j$
+  - directed cycles here mean **deadlocks**
+- we can **order** mutexes topologically to insure there's always at least one process not being blocked
+  - this can not always be done for example if the edges can be set dynamically by the data (e.g. data contains its destination)
