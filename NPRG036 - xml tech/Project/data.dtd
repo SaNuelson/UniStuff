@@ -1,0 +1,158 @@
+<!--
+	Changelog: 
+			Added [game] -> [achievements]
+			Added [game] -> [ingame-store]
+				Idea: 
+					Each game can have its own achievements with rewards in points.
+					Each game can have its own in-game store with items that cost the same points.
+			TODO: Add [user] -> point purchase history
+			TODO: Add [user] -> ingame inventory 
+			Modified [owned-game]
+			Moved [title] to shared	
+			Created shared [plain-description]
+-->
+
+
+<!-- Elements with fixed hierarchy position -->
+<!ELEMENT drm (server-info, games, developers, publishers, users)>
+<!ATTLIST drm
+		owner CDATA #FIXED "Multiverse Games">
+	
+	<!ELEMENT server-info (#PCDATA)>
+
+	<!ELEMENT games (game*)>
+	
+		<!ELEMENT game (title, creation-date, description, reviews, achievements?, ingame-store?)>
+		<!ATTLIST game
+				id-self ID #REQUIRED
+				id-dev IDREF #REQUIRED
+				id-pub IDREF #IMPLIED
+				rating (E | E10PLUS | T | M | AO | RP) "RP"> <!-- Publisher isn't required -->
+		
+			<!-- ELEMENT title SHARED -->	
+			<!-- ELEMENT creation-date SHARED -->
+			<!-- ELEMENT description SHARED -->
+			
+			<!ELEMENT reviews (review*)>
+			
+				<!ELEMENT review (creation-date, text, comment-section)>
+				<!ATTLIST review
+						author IDREF #REQUIRED>
+						
+					<!-- ELEMENT creation-date SHARED -->
+					<!-- ELEMENT text SHARED -->
+					<!ELEMENT comment-section (comment*)>
+					
+						<!ELEMENT comment (creation-date, text, reply-section)>
+						<!ATTLIST comment
+								author IDREF #REQUIRED> <!-- Comments no longer anonymous -->
+						
+							<!-- ELEMENT creation-date SHARED -->
+							<!-- ELEMENT text SHARED -->
+							<!ELEMENT reply-section (reply*)> <!-- Reply section is final in contrast to comment-section -->
+							
+								<!ELEMENT reply (creation-date, text)>
+								<!ATTLIST reply
+										author IDREF #REQUIRED> <!-- No anonymous -->
+										
+									<!-- ELEMENT creation-date SHARED -->
+									<!-- ELEMENT text SHARED -->
+				
+			<!ELEMENT achievements (achievement*)>
+			
+				<!ELEMENT achievement (title,plain-description,secret?,external-data,points)>
+				<!ATTLIST achievement
+						id-self ID #REQUIRED>
+				
+					<!-- ELEMENT title SHARED -->
+					<!-- ELEMENT plain-description SHARED -->
+					<!ELEMENT secret EMPTY> <!-- Secret achievements have hidden description and are shown only once achieved -->
+					<!-- ELEMENT external-data SHARED --> <!-- Custom condition data for completion -->
+					<!ELEMENT points (#PCDATA)> <!-- Points awarded for completion -->
+					
+			<!ELEMENT ingame-store (ingame-item*)>
+			
+				<!ELEMENT ingame-item (title,plain-description,external-data?,max-per-user,price)>
+				<!ATTLIST ingame-item
+						id-self ID #REQUIRED>
+				
+					<!-- ELEMENT title SHARED -->
+					<!-- ELEMENT plain-description -->
+					<!-- ELEMENT external-data --> <!-- for more complicated stuff -->
+					<!ELEMENT max-per-user (#PCDATA)> <!-- # cap, 0 for infty -->
+					<!ELEMENT price (#PCDATA)> <!-- In points -->
+
+	<!ELEMENT developers (developer*)>
+	
+		<!ELEMENT developer (name, creation-date, description)>
+		<!ATTLIST developer
+				id-self ID #REQUIRED>
+		
+			<!-- ELEMENT name SHARED -->
+			<!-- ELEMENT creation-date SHARED -->
+			<!-- ELEMENT description SHARED -->
+	
+	<!ELEMENT publishers (publisher*)>
+	
+		<!ELEMENT publisher (name, creation-date, plain-description?, website?)>
+		<!ATTLIST publisher
+				id-self ID #REQUIRED>
+		
+			<!-- ELEMENT name SHARED -->
+			<!-- ELEMENT creation-date SHARED -->
+			<!-- ELEMENT plain-description SHARED -->	<!-- In contrast to other descriptions, any advertisment is against T&T in the publisher section. -->
+			<!ELEMENT website EMPTY>
+			<!ATTLIST website
+					url CDATA #REQUIRED> <!-- Could be link ELEMENT, made mainly to fill task conditions -->
+
+	<!ELEMENT users (user*)>
+	
+		<!ELEMENT user (email, pass-hash, nickname, verified?, description?, owned-games)>
+		<!ATTLIST user
+				id-self ID #REQUIRED>
+		
+			<!ELEMENT email (#PCDATA)>
+			<!ELEMENT pass-hash (#PCDATA)>
+			<!ELEMENT nickname (#PCDATA)>
+			<!ELEMENT verified EMPTY> <!-- Element present only when user account is fully verified (eg. email verification, payment verification -->
+			<!-- ELEMENT description SHARED -->
+			<!ELEMENT owned-games (owned-game)*>
+			
+				<!ELEMENT owned-game (creation-date, time-played, ingame-inventory?)>
+				<!ATTLIST owned-game
+						id-game IDREF #REQUIRED
+						id-achs IDREFS #IMPLIED> <!-- achievements obtained -->
+				
+					<!-- ELEMENT creation-date SHARED -->
+					<!ELEMENT time-played (#PCDATA)>
+					<!ELEMENT ingame-inventory (inventory-item*)>
+					
+						<!ELEMENT inventory-item (quantity,external-data?)>
+						<!ATTLIST inventory-item
+								id-item IDREF #REQUIRED>
+						
+							<!ELEMENT quantity (#PCDATA)>
+							<!-- ELEMENT external-data SHARED -->
+
+<!-- Shared elements accross hierarchy -->
+
+<!ELEMENT general-reference (#PCDATA)>
+<!ATTLIST general-reference
+		id-reference IDREF #REQUIRED>
+
+<!ELEMENT plain-description (#PCDATA)> <!-- Alternative description where references don't make sense -->
+<!ELEMENT description (#PCDATA | general-reference)*>
+	<!-- ELEMENT general-reference SHARED -->
+
+<!ELEMENT name (#PCDATA)>
+
+<!ELEMENT title (#PCDATA)>
+
+<!ELEMENT creation-date (#PCDATA)>
+
+<!ELEMENT external-data (#PCDATA)> <!-- data specific for the external parser -->
+
+<!ELEMENT text (#PCDATA)>
+
+<!-- Entity Section -->
+<!ENTITY multiverse "Multiverse Games, DRM Incorporated">

@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE real-estate SYSTEM "data.dtd">
+<real-estate language="EN">
+    
+    <!-- List of agencies -->
+    <agencies>
+        <agency>
+            <name>Best properties in New York</name>
+            <email>info@best-nyc.com</email>
+            <phone>+1 212-606-3600</phone>
+            <address>
+                <street>934 5th avenue</street>
+                <postalCode>NY 10021</postalCode>
+                <state>New York</state>
+                <country>United States</country>
+            </address>
+            <employee>
+				<firstName>John</firstName>
+				<lastName>Smith</lastName>
+            </employee>
+            <employee>
+				<firstName>Patrick</firstName>
+				<lastName>Jones</lastName>
+            </employee>
+            <employee>
+				<firstName>Emily</firstName>
+				<lastName>Smith</lastName>
+            </employee>
+        </agency>
+    </agencies>
+    
+    <!-- List of owners -->
+    <owners>
+        <owner idOwner="o1">
+            <name>NYC Real estate</name>
+            <address>
+                <street>984 6th avenue</street>
+                <postalCode>NY 10021</postalCode>
+                <state>New York</state>
+                <country>United States</country>
+            </address>
+        </owner>
+        <owner idOwner="o2">
+            <name>První realitní</name>
+            <address>
+                <street>Moskevská 234</street>
+                <postalCode>11000</postalCode>
+                <state>Praha</state>
+                <country>Česká republika</country>
+            </address>
+        </owner>
+        <owner idOwner="o3">
+            <name>Alexandr Kendík</name>
+            <address>
+                <street>Soukenné náměstí 25</street>
+                <postalCode>46001</postalCode>
+                <state>Liberecký kraj</state>
+                <country>Česká republika</country>
+            </address>
+        </owner>
+        <owner idOwner="o2a">
+            <name>První realitní</name>
+            <address>
+                <street>Moskevská 235</street>
+                <postalCode>11000</postalCode>
+                <state>Praha</state>
+                <country>Česká republika</country>
+            </address>
+        </owner>
+    </owners>
+    
+    <!-- List of properties -->
+    <properties>
+		
+        <property idProperty="p1" owner="o1">
+            <name>Luxury Skyscraper</name>
+            <address>
+                <street>14 26th avenue</street>
+                <state>New York</state>
+                <postalCode>NY 10021</postalCode>
+            </address>
+            <numberOfFlats>154</numberOfFlats>
+            <features>
+                <feature>elevator</feature>
+                <feature>parking</feature>
+                <feature>security</feature>
+                <feature>sea view</feature>
+                <feature>subway</feature>
+            </features>
+            <employee>
+				<firstName>John</firstName>
+				<lastName>Smith</lastName>
+            </employee>
+        </property>
+        
+        <property idProperty="p3">
+            <name>Old Skyscraper</name>
+            <address>
+                <street>16 26th avenue</street>
+                <state>New York</state>
+                <postalCode>NY 10021</postalCode>
+            </address>
+            <numberOfFlats>1</numberOfFlats>
+            <features>
+                <feature>street view</feature>
+                <feature>subway</feature>
+            </features>
+        </property>
+        
+    </properties>
+    
+    <!-- List of flats -->
+    <flats>
+		
+        <flat idFlat="f1" property="p1" comfort="F">
+            <name>A1001</name>
+            <rate>1234</rate>
+            <data>A small flat with no windows. Bedbugs included.</data>
+            <record>
+                <record>
+                    <date>2015-07-11</date><text>Bedbugs observed.</text>
+                </record>
+                <record>
+                    <date>2015-07-12</date><text>Cleaning perfomed.</text>
+                </record>
+            </record>
+            <record>
+                <date><?php echo date("Y-m-d"); ?></date>
+                <text>Bedbugs observed once again.</text>
+            </record>
+        </flat>
+		
+        <flat idFlat="f2" property="p1" comfort="A">
+            <name>A2601</name>
+            <rate>46001</rate>
+            <data>
+                <description>Large suite with garden on the rooftop.</description>
+                Sea view, 200 m&sup2;.
+                <name>Splendid suite</name>
+                <description>46001</description>
+                &lt;span class=&quot;btn&quot;&gt;Button&lt;/span&gt;
+                <![CDATA[
+                    <span class=“btn”>Button</span>
+                ]]>
+            </data>
+            <features>
+                <feature>own elevator</feature>
+                <feature>garden</feature>
+                <feature>bath</feature>
+                <feature>2 bathrooms</feature>
+            </features>
+        </flat>
+        
+        <flat idFlat="f3" property="p1" comfort="B">
+            <name>A654</name>
+            <rate>12345</rate>
+            <data>
+                <description>Nice view, no bugs.</description>
+            </data>
+            <features>
+                <feature>carpet</feature>
+                <feature>kitchen</feature>
+                <feature>2 bathrooms</feature>
+            </features>
+        </flat>
+        
+        <flat idFlat="f4" property="p1" comfort="C">
+            <name>A0001</name>
+            <rate>456</rate>
+            <data>
+                <description>Basement apartment, basically to be used by bands or someone noisy.</description>
+            </data>
+            <features>
+                <feature>soundproof</feature>
+                <feature>dark</feature>
+                <feature>small</feature>
+            </features>
+            <flat idFlat="f4a" property="p1" comfort="C">
+                <name>A0001-A</name>
+                <rate>45</rate>
+                <data>
+                    <description>Room A. Has a separate study cubicle.</description>
+                </data>
+                <features>
+                    <feature>soundproof</feature>
+                    <feature>dark</feature>
+                    <feature>small</feature>
+                </features>
+                <flat idFlat="f4a1" property="p1" comfort="C">
+                    <name>A0001-A1</name>
+                    <rate>26</rate>
+                    <data>
+                        <description>Study cubicle.</description>
+                    </data>
+                    <features>
+                        <feature>soundproof</feature>
+                        <feature>dark</feature>
+                        <feature>small</feature>
+                        <feature>room</feature>
+                    </features>
+                </flat>
+            </flat>
+            <flat idFlat="f4b" property="p1" comfort="C">
+                <name>A0001-B</name>
+                <rate>46</rate>
+                <data>
+                    <description>No windows.</description>
+                </data>
+                <features>
+                    <feature>soundproof</feature>
+                    <feature>dark</feature>
+                    <feature>small</feature>
+                    <feature>no daylight</feature>
+                </features>
+            </flat>
+        </flat>
+        
+    </flats>
+    
+</real-estate>

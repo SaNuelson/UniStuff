@@ -1,0 +1,118 @@
+load account.maude
+
+fmod BANK is
+
+    protecting ACCOUNT .
+
+    sort Bank AccountList .
+
+    var bankName, holderName : Name .
+    var account : Account .
+    var accounts : AccountList .
+
+    op accountList : -> AccountList .
+    op accountList : Account AccountList -> AccountList .
+
+    op bank : Name AccountList -> Bank .
+    op nilBank : -> Bank .
+
+    op getBankName : Bank -> Name .
+    eq getBankName(bank(bankName, accounts)) = bankName .
+
+    op getAccByName : Bank Name -> Account .
+    eq getAccByName(bank(bankName, accounts), holderName) =
+        getAccByName(accounts, holderName) .
+
+    op getAccByName : AccountList Name -> Account .
+    eq getAccByName(accountList(account, accounts), holderName) =
+        if getAccHolderName(account) == holderName then
+            account
+        else
+            getAccByName(accounts, holderName)
+        fi .
+    eq getAccByName(accountList, holderName) = nilAccount .
+
+    var card : Card .
+    var amount : Float .
+    op issueDeposit : Bank Card Float -> Bank .
+    eq issueDeposit(bank(bankName, accounts), card, amount) =
+        bank(bankName, issueDeposit(accounts, card, amount)) .
+
+    op issueDeposit : AccountList Card Float -> AccountList .
+    eq issueDeposit(accountList(account, accounts), card, amount) =
+        if getAccHolderName(account) == getCardHolderName(card) then
+            accountList(giveFunds(account, amount), accounts)
+        else
+            accountList(account, issueDeposit(accounts, card, amount))
+        fi .
+
+    op issueWithdraw : Bank Card Float -> Bank .
+    eq issueWithdraw(bank(bankName, accounts), card, amount) =
+        bank(bankName, issueWithdraw(accounts, card, amount)) .
+
+    op issueWithdraw : AccountList Card Float -> AccountList .
+    eq issueWithdraw(accountList(account, accounts), card, amount) =
+        if getAccHolderName(account) == getCardHolderName(card) then
+            accountList(takeFunds(account, amount), accounts)
+        else
+            accountList(account, issueWithdraw(accounts, card, amount))
+        fi .
+
+    --- For test purposes
+
+    op addAccount : Bank Account -> Bank .
+    eq addAccount(bank(bankName, accounts), account) = 
+        bank(bankName, accountList(account, accounts)) .
+
+    op bank : Name -> Bank .
+    eq bank(bankName) = bank(bankName, accountList) .
+
+endfm
+
+fmod BANK-LIST is 
+    protecting BANK .
+
+    sort BankList .
+
+    var bank : Bank .
+    var banks : BankList .
+    var bankName : String .
+
+    op bankList : -> BankList .
+    op bankList : Bank BankList -> BankList .
+
+    op getBankByName : BankList Name -> Bank .
+    eq getBankByName(bankList(bank, banks), bankName) = 
+        if getBankName(bank) == bankName then
+            bank
+        else
+            getBankByName(banks, bankName)
+        fi .
+
+    var card : Card .
+    op findCardAccount : BankList Card -> Account .
+    eq findCardAccount(banks, card) = 
+        getAccByName(getBankByName(banks, getCardBankName(card)), getCardHolderName(card)) .
+
+    --- For testing purposes
+
+    op addBank : BankList Bank -> BankList .
+    eq addBank(banks, bank) = bankList(bank, banks) .
+
+    var amount : Float .
+    op issueDeposit : BankList Card Float -> BankList .
+    eq issueDeposit(bankList(bank, banks), card, amount) =
+        if getCardBankName(card) == getBankName(bank) then
+            bankList(issueDeposit(bank, card, amount), banks)
+        else
+            bankList(bank, issueDeposit(banks, card, amount))
+        fi .
+    op issueWithdraw : BankList Card Float -> BankList .
+    eq issueWithdraw(bankList(bank, banks), card, amount) =
+        if getCardBankName(card) == getBankName(bank) then
+            bankList(issueWithdraw(bank, card, amount), banks)
+        else
+            bankList(bank, issueWithdraw(banks, card, amount))
+        fi .
+
+endfm

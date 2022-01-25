@@ -1,0 +1,47 @@
+module Utils
+
+imports
+	from Main
+		types EmitterData renamed Data;
+
+exports
+	functions
+		lessThan : Data -> (Data -> bool);
+		lessOrEqualTo : Data -> (Data -> bool);
+		equalTo : Data -> (Data -> bool);
+		greaterThan : Data -> (Data -> bool);
+		greaterOrEqualTo : Data -> (Data -> bool);
+
+definitions
+
+functions
+
+	lessThan : Data -> (Data -> bool)
+	lessThan(val) == lambda ed : Data & ed < val;
+	
+	lessOrEqualTo : Data -> (Data -> bool)
+	lessOrEqualTo(val) == lambda ed : Data & ed <= val;
+	
+	equalTo : Data -> (Data -> bool)
+	equalTo(val) == lambda ed : Data & ed = val;
+	
+	greaterThan : Data -> (Data -> bool)
+	greaterThan(val) == lambda ed : Data & ed > val;
+	
+	greaterOrEqualTo : Data -> (Data -> bool)
+	greaterOrEqualTo(val) == lambda ed : Data & ed >= val;
+	
+
+end Utils
+
+module Globals
+
+exports all
+
+definitions
+
+	types
+	
+		String = seq of char;
+
+end Globals

@@ -1,0 +1,208 @@
+module Main
+
+exports all
+
+definitions
+
+types
+
+  String = seq of char ;
+
+  -- Smart system
+  -- - incorporates the whole structure
+  System ::
+    devices : set of Device
+    interactions : seq of Interaction
+  -- INVARIANT: each device linked to interaction needs to exist exactly once
+  inv sys == 
+  	forall interaction in seq sys.interactions & 
+  		(
+  			forall condition in set interaction.conditions &
+  				exists1 dev in set sys.devices &
+  					dev.id = condition.emitterId and
+  					is_Emitter(dev)
+			) and 
+			(
+				forall action in seq interaction.effects &
+					exists1 dev in set sys.devices &
+						dev.id = action.absorberId and
+						is_Absorber(dev)
+			) ;
+	
+  -- Emitter
+  -- - Abstraction of all devices which produce signals (sensors, clocks, timers, global variable holders...)
+  EmitterData = real ;
+  EmitterDataBounds ::
+  	low : EmitterData
+  	high : EmitterData;
+  Emitter ::
+  	id : String
+  	desc : String
+  	bounds : EmitterDataBounds
+  	data : EmitterData
+  	-- INVARIANT: emitter data within bounds
+  	inv emt == emt.data >= emt.bounds.low and emt.data <= emt.bounds.high ;
+  	
+  -- Absorber
+  -- - Abstraction of all devices which "affect real world" upon activation (physical device controllers, switcher...)
+  AbsorberState = real ;
+  AbsorberStateBounds ::
+  	low : AbsorberState
+  	high : AbsorberState;
+  Absorber ::
+  	id : String
+  	desc : String
+  	bounds : AbsorberStateBounds
+  	status : AbsorberState
+  	-- INVARIANT: absorber state within bounds
+  	inv abr == abr.status >= abr.bounds.low and abr.status <= abr.bounds.high ;
+
+  Device = Emitter | Absorber;
+
+	-- Condition
+	-- - Wrapper for fragments of logic for individual emitters.
+	-- - Checks on demand whether a condition is fulfilled.
+	Condition ::
+		emitterId : String
+		condition : EmitterData -> bool ;
+
+	-- Action
+	-- - Wrapper for fragments of logic for individual absorbers.
+	-- - Holds desired new state along with absorber ID for later use.
+	Action ::
+		absorberId : String
+		effect : AbsorberState ;
+
+	-- Interaction
+	-- - Wrapper for logical construct between conditions and actions.
+  Interaction ::
+  	conditions : set of Condition
+  	effects : seq of Action 
+  	-- INVARIANT: conditions and effects non-empty
+  	inv interaction == 
+  		card interaction.conditions > 0 and
+  		len interaction.effects > 0;
+
+functions
+
+	-- SECTION: ctors & debug functions
+	-- used exclusively for easier testing
+	
+	createSystem : set of Device * seq of Interaction -> System
+	createSystem(devs, interactions) == mk_System(devs, interactions);
+	
+	createEmitter : String * String * EmitterData * EmitterData * EmitterData -> Emitter
+	createEmitter(id, desc, default, low, high) == mk_Emitter(id, desc, mk_EmitterDataBounds(low, high), default);
+	
+	createAbsorber : String * String * AbsorberState * AbsorberState * AbsorberState -> Absorber
+	createAbsorber(id, desc, default, low, high) == mk_Absorber(id, desc, mk_AbsorberStateBounds(low, high), default);
+
+	createCondition : String * (EmitterData -> bool) -> Condition
+	createCondition(id, cond) == mk_Condition(id, cond);
+	
+	createAction : String * AbsorberState -> Action
+	createAction(id, newState) == mk_Action(id, newState);
+	
+	createInteraction : set of Condition * seq of Action -> Interaction
+	createInteraction(conds, acts) == mk_Interaction(conds, acts);
+
+	-- show inputs mapped to their signals
+	showInputs : System -> map String to EmitterData
+	showInputs(sys) == {emitter.id |-> emitter.data | emitter in set sys.devices & is_Emitter(emitter)};
+	
+	-- show outputs mapped to their current state
+	showOutputs : System -> map String to AbsorberState
+	showOutputs(sys) == {absorber.id |-> absorber.status | absorber in set sys.devices & is_Absorber(absorber)};
+
+	-- SECTION: altering & checking
+	-- the API in a way (system interacts with physical devices through these methods)
+
+	/**
+	 * Make an emitter device observe some new data.
+	 * Note: Simply changes device state, doesn't update system, see 'updateSystem'.
+	 */	
+	observe : System * String * EmitterData -> System
+	observe(sys, id, newData) ==
+		let 
+			affectedEmitter = iota dev in set sys.devices & dev.id = id,
+			newEmitter = mu(affectedEmitter, data |-> newData),
+			newDevices = (sys.devices \ {affectedEmitter}) union {newEmitter}
+		in mu(sys, devices |-> newDevices)
+	-- PRECONDITION: Specified device needs to exist, be unique and be an emitter
+	pre exists1 dev in set sys.devices & dev.id = id and is_Emitter(dev);
+
+	/**
+	 * Retrieve current state of a specific absorber device.
+	 * Note: Currently calls 'updateSystem' (mostly for debug purposes).
+	 * Ideally, updating should be done separately to mirror real-case scenario.
+	 */
+	check : System * String -> AbsorberState
+	check(sys, id) ==
+		let
+			updatedSystem = updateSystem(sys),
+			affectedAbsorber = iota dev in set updatedSystem.devices & dev.id = id
+		in
+			affectedAbsorber.status
+	-- PRECONDITION: Specified device nedes to exist, be unique and be an absorber
+	pre exists1 dev in set sys.devices & dev.id = id and is_Absorber(dev);
+
+	-- SECTION: processing
+	-- internal method chain
+
+  /**
+   * Call system update which goes through all interactions
+   * and updates absorbers accordingly.
+   *
+   * Can be called explicitly (and most likely would be in some kind of update loop),
+   * but it currently called within getter function.
+   */
+  updateSystem : System -> System
+  updateSystem(sys) == mu(sys, devices |-> applyInteractions(sys.devices, sys.interactions)) ;
+
+	/** Internal function, see: updateSystem */
+  applyInteractions : set of Device * seq of Interaction -> set of Device
+  applyInteractions(devs, acts) ==
+  	cases acts:
+  		[] -> devs,
+  		[action]^actions ->
+	    	let updatedDevs = applyInteraction(devs, action)
+	    	in applyInteractions(updatedDevs, actions)
+		end
+		measure len acts;
+	  
+	/** Internal function, see: applyInteractions */
+	applyInteraction : set of Device * Interaction -> set of Device
+	applyInteraction(devs, act) ==
+		if checkConditions(devs, act.conditions) 
+			then applyEffects(devs, act.effects)
+			else devs;
+	
+	/** Internal function, see: applyInteraction */
+	checkConditions : set of Device * set of Condition -> bool
+	checkConditions(devs, conds) == 
+		forall cond in set conds &
+			exists dev in set devs &
+				dev.id = cond.emitterId and
+				cond.condition(dev.data) ;
+				
+	/** Internal function, see: checkConditions */
+	applyEffects : set of Device * seq of Action -> set of Device
+	applyEffects(devs, acts) ==
+		cases acts:
+			[] -> devs,
+			[action]^actions ->
+				let updatedDevs = applyEffect(devs, action)
+				in applyEffects(updatedDevs, actions)
+		end 
+		measure len acts;
+		
+	/** Internal function, see: applyEffects */
+	applyEffect : set of Device * Action -> set of Device
+	applyEffect(devs, act) ==
+		let
+			affectedDevice = iota dev in set devs & dev.id = act.absorberId,
+			newDevice = mu(affectedDevice, status |-> act.effect)
+		in (devs \ {affectedDevice}) union {newDevice} ;
+		
+end Main
+	

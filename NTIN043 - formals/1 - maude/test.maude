@@ -1,0 +1,143 @@
+load atm.maude
+
+fmod TEST-WORLD is
+    protecting ATM .
+
+    op mockupCard111 : -> Card .
+    eq mockupCard111 = card("KB", "Ferda von Zeppelin", 444000444, 20211201) .
+    op mockupPin111 : -> Pin .
+    eq mockupPin111 = 1111 .
+
+    op mockupCard211 : -> Card .
+    eq mockupCard211 = card("Fio", "Franta Pepa Jednicka", 123123123, 20220401) .
+    op mockupPin211 : -> Pin .
+    eq mockupPin211 = 9292 .
+
+    op mockupCard212 : -> Card .
+    eq mockupCard212 = card("Fio", "Franta Pepa Jednicka", 997755333, 20211001) .
+    op mockupPin212 : -> Pin .
+    eq mockupPin212 = 5927 .
+
+    op mockupAcc11 : -> Account .
+    eq mockupAcc11 = addCard(account("Ferda von Zeppelin", 1230000.0), 
+                             mockupCard111, mockupPin111) .
+
+    op mockupAcc21 : -> Account .
+    eq mockupAcc21 = addCard(
+                     addCard(account("Franta Pepa Jednicka", 25000.0), 
+                                     mockupCard211, mockupPin211), 
+                                     mockupCard212, mockupPin212) .
+
+    op mockupAcc22 : -> Account .
+    eq mockupAcc22 = account("Musilova-Vebrova", 4000.0) .
+
+    op mockupBank1 : -> Bank .
+    eq mockupBank1 = addAccount(bank("KB"), mockupAcc11) .
+
+    op mockupBank2 : -> Bank .
+    eq mockupBank2 = addAccount(addAccount(bank("Fio"), mockupAcc21), mockupAcc22) .
+
+    op mockupBanks : -> BankList .
+    eq mockupBanks = addBank(addBank(bankList, mockupBank1), mockupBank2) .
+
+    op mockupAtm : -> Atm .
+    eq mockupAtm = initAtm(mockupBanks) .
+
+endfm
+
+fmod SCENARIOS is
+    protecting TEST-WORLD .
+
+    --- Test scenario 1:    
+    --- Franta comes in to deposit 5000 and check balance after to make sure
+    op s1insert : -> Atm .
+    eq s1insert = insertCard(mockupAtm, mockupCard211) .
+
+    --- card gets validated against current date (e.g. 15.11.2021)
+    op s1valid : -> Atm .
+    eq s1valid = validateCard(s1insert, 20211115) .
+
+    --- insert pin
+    op s1auth : -> Atm .
+    eq s1auth = readUserPin(s1valid, 9292) .
+
+    --- deposit 5000
+    op s1depo : -> Atm .
+    eq s1depo = deposit(s1auth, sumToInv(5000.0)) .
+
+    --- check balance finally
+    op s1check : -> Atm .
+    eq s1check = checkBalance(s1depo) .
+
+    --- and eject card
+    op s1eject : -> Atm .
+    eq s1eject = ejectCard(s1check) .
+
+    
+    --- Test scenario 2.
+    --- Franta uses expired card, tries to withdraw 2000.
+    op s2insert : -> Atm .
+    eq s2insert = insertCard(mockupAtm, mockupCard212) .
+
+    --- card fails to get validated
+    op s2valid : -> Atm .
+    eq s2valid = validateCard(s2insert, 20211115) .
+
+    --- posts correct pin, card stays locked
+    op s2auth : -> Atm .
+    eq s2auth = readUserPin(s2valid, 5927) .
+
+    --- withdrawal ends with error message, doesnt propagate to bank data
+    op s2withdraw : -> Atm .
+    eq s2withdraw = withdraw(s2auth, 2000.0) .
+
+    --- eject works regardless of pin or card validity
+    op s2eject : -> Atm .
+    eq s2eject = ejectCard(s2withdraw) .
+
+    --- Test scenario 3.
+    --- Ferda comes withdrawing a lot of money 999.950
+    op s3insert : -> Atm .
+    eq s3insert = insertCard(mockupAtm, mockupCard111) .
+
+    --- validates and puts pin
+    op s3valid : -> Atm .
+    eq s3valid = validateCard(s3insert, 20211115) .
+
+    op s3auth : -> Atm .
+    eq s3auth = readUserPin(s3valid, 1111) .
+
+    --- tries to withdraw 999.950, which is too much (atm holds 380.000)
+    op s3withdraw : -> Atm .
+    eq s3withdraw = withdraw(s3auth, 999950.0) .
+
+    --- instead tries only 123.450
+    op s3withdraw2 : -> Atm .
+    eq s3withdraw2 = withdraw(s3withdraw, 123450.0) .
+
+    --- and ejects
+    op s3eject : -> Atm .
+    eq s3eject = ejectCard(s3withdraw2) .
+
+endfm
+
+--- Test scenario 1 exec
+--- check that account has been upped by 5000
+rew getAccBalance(findCardAccount(getAtmBankData(s1insert), mockupCard211)) .
+--- before operations, should be 25000
+rew getAccBalance(findCardAccount(getAtmBankData(s1check), mockupCard211)) .
+
+--- Test scenario 2 exec
+--- account balance should not change (both should be 25000)
+rew getAccBalance(findCardAccount(getAtmBankData(s2insert), mockupCard212)) .
+rew getAccBalance(findCardAccount(getAtmBankData(s2withdraw), mockupCard212)) .
+--- furthermore an error should be present "nonAuth" - could not finish auth process
+rew getAtmError(s2withdraw) .
+
+--- Test scenario 3 exec
+--- check that acc balance doesnt change with first withdrawal, and atmBalError is present
+red getAccBalance(findCardAccount(getAtmBankData(s3auth), mockupCard111)) .
+red getAccBalance(findCardAccount(getAtmBankData(s3withdraw), mockupCard111)) .
+red getAtmError(s3withdraw) .
+--- check that it changes after second withdrawal
+red getAccBalance(findCardAccount(getAtmBankData(s3withdraw2), mockupCard111)) .

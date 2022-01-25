@@ -1,0 +1,112 @@
+module TestSuiteSim
+
+imports 
+	from Main
+		functions
+			createEmitter renamed newEmitter ;
+			createAbsorber renamed newAbsorber ;
+			createCondition renamed newCondition ;
+			createAction renamed newAction ;
+			createInteraction renamed newInteraction ;
+			createSystem renamed newSystem ;
+			observe renamed withEvent;
+			updateSystem renamed update;
+			check renamed checkState;
+			showInputs renamed showInputs;
+			showOutputs renamed showOutputs,
+
+	from Utils
+		functions
+			lessThan renamed lt;
+			lessOrEqualTo renamed le;
+			equalTo renamed eqt;
+			greaterThan renamed gt;
+			greaterOrEqualTo renamed ge;
+
+definitions
+
+values
+	
+	extLight = newEmitter("E-LS", "Light sensor on the roof", 200, 0, 200000); -- in lux
+	garageMotion = newEmitter("E-GMS", "Motion sensor in garage", 0, 0, 1); -- binary
+	clock = newEmitter("E-CM", "System's internal clock", 0, 0, 86400); -- in sec per day
+	extHygrometer = newEmitter("E-EHM", "Moisture meter for lawn", 0.6, 0, 1); -- moisture in percent
+	extThermometer = newEmitter("E-ETM", "Outdoor thermometer", 20, -40, 50); -- commmon thm. range
+	intThermometer = newEmitter("E-ITM", "Indoor thermometer", 23, -40, 50); -- common thm. range
+	phoneGps = newEmitter("E-PG", "Distance of phone GPS to house", 0, 0, 10000); -- dist. in km
+	
+	garageDoor = newAbsorber("A-GDC", "Controller for garage door", 0, 0, 1); -- binary
+	alarm = newAbsorber("A-AC", "Trigger for alarm clock", 0, 0, 1); -- binary
+	emerDial = newAbsorber("A-ED", "Automatic 911 dialer", 0, 0, 1); -- binary
+	radio = newAbsorber("A-RC", "Controller for radio", 0, 0, 1); -- volume
+	sprinklers = newAbsorber("A-SC", "Controller for outdoor sprinklers", 0, 0, 1); -- binary
+	shutters = newAbsorber("A-WS", "Controller for window shutters", 0, 0, 1); -- angle
+	extLamps = newAbsorber("A-EL", "Controller for garden lamps", 0, 0, 1); -- binary
+	
+	extMoistTooLow = newCondition("E-EHM", le(0.4));
+	turnOnSprinklers = newAction("A-SC", 1);
+	irrigationOn = newInteraction({extMoistTooLow}, [turnOnSprinklers]);
+	
+	extMoistTooHigh = newCondition("E-EHM", ge(0.7));
+	turnOffSprinklers = newAction("A-SC", 0);
+	irrigationOff = newInteraction({extMoistTooHigh}, [turnOffSprinklers]);
+	
+	extTooDark = newCondition("E-LS", lt(50));
+	turnOnLamps = newAction("A-EL", 1);
+	extLampsOn = newInteraction({extTooDark}, [turnOnLamps]);
+	
+	extTooLight = newCondition("E-LS", ge(50));
+	turnOffLamps = newAction("A-EL", 0);
+	extLampsOff = newInteraction({extTooLight}, [turnOffLamps]);
+	
+	timeToWake = newCondition("E-CM", ge(28800)); -- 8:00 AM
+	ownerAtHome = newCondition("E-PG", le(0.05));
+	startRadio = newAction("A-RC", 1);
+	openShutters = newAction("A-WS", 0.8);
+	wakeUser = newInteraction({timeToWake, ownerAtHome}, [startRadio, openShutters]);
+	
+	garageMovement = newCondition("E-GMS", eqt(1));
+	ownerAway = newCondition("E-PG", gt(1));
+	dialPolice = newAction("A-ED", 1);
+	alertBreach = newInteraction({garageMovement, ownerAway}, [dialPolice]);
+	
+	allEmitters = {extLight, garageMotion, clock, extHygrometer, extThermometer, intThermometer, phoneGps};
+	allAbsorbers = {garageDoor, alarm, emerDial, radio, sprinklers, shutters, extLamps};
+	allDevices = allEmitters union allAbsorbers;
+	
+	allInteractions = [irrigationOn, irrigationOff, extLampsOn, extLampsOff, wakeUser, alertBreach];
+	
+	testSystem = newSystem(allDevices, allInteractions);
+	
+functions
+
+	testMain : () -> bool
+	testMain() == 
+		let
+			sys0 = testSystem,
+			sys1 = withEvent(sys0, "E-PG", 0.02), -- owner at home
+			sys2 = withEvent(sys1, "E-CM", 28800), -- morning
+			-- wake user here
+			sys3 = withEvent(sys2, "E-PG", 50), -- user left
+			sys4 = withEvent(sys3, "E-EHM", 0.5), -- moisture lowering
+			sys5 = withEvent(sys4, "E-EHM", 0.4), -- moisture too low
+			-- irrigation on here
+			sys6 = withEvent(sys5, "E-EHM", 0.6),
+			sys7 = withEvent(sys6, "E-LS", 30), -- light too dark
+			-- ext lamps on here
+			sys8 = withEvent(sys7, "E-EHM", 0.8), -- moisture too high
+			-- irrigation off here
+			sys9 = withEvent(sys8, "E-GMS", 1), -- garage motion detected
+			-- alert breach here
+			sys10 = withEvent(sys9, "E-LS", 200) -- light too bright
+			-- ext lamps off here
+		in
+			checkState(sys2, "A-RC") = 1 and -- radio on
+			checkState(sys2, "A-WS") = 0.8 and -- shutters opened
+			checkState(sys5, "A-SC") = 1 and -- sprinklers on
+			checkState(sys7, "A-EL") = 1 and -- ext lamps on
+			checkState(sys8, "A-SC") = 0 and -- sprinklers off
+			checkState(sys9, "A-ED") = 1 and -- police dial
+			checkState(sys10, "A-EL") = 0; -- ext lamps off
+
+end TestSuiteSim

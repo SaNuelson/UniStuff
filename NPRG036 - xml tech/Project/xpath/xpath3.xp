@@ -1,0 +1,2 @@
+(: mature games published after 1.1.2020 :)
+drm/games/game[@rating="M" and translate(creation-date,'.','') > 112020]

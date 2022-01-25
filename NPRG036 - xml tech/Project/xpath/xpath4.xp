@@ -1,0 +1,2 @@
+(: last title in the whole document, which has a "plain-description" following sibling :)
+(//title[following-sibling::plain-description])[last()]

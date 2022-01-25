@@ -1,0 +1,903 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<drm owner="Multiverse Games"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="data.xsd">
+    <server-info>
+		Last update from server at:         <?php echo Date("d.m.Y")?>
+    </server-info>
+    <games>
+        <game id-self="g-1" id-dev="dev-neverlight" rating="E10PLUS">
+            <title>Space Scrapper</title>
+            <creation-date>TBA</creation-date>
+            <description>
+				In an intergalactic era, you would think the humanity has finally
+				found it's inner peace so to speak. However, there are new dangers
+				that await the ever-expanding human race. Extraterrestrial immigrants,
+				LGBTS rallies (S stands for Space-kin), and inter-space liberals that
+				aim to stomp and destroy all Traditional Values and establich oligarchic
+				anarchy upon the galaxy.
+				Soon, because of these monstrous intentions, 1st Galactic War took place
+				and what used to be a prosperous galactic central, is now but a void
+				filled with ashes and scraps of the old world.
+				You, as one of the few survivors need to rebuild the civilisation to its
+				former glory.
+				Embark on your ship into the hostile waste-space, collect resources,
+				improve your vessel and root out the bandits that lurk on every corner.
+				The Galaxy is counting on you!
+            </description>
+            <reviews/>
+            <achievements>
+                <achievement id-self="ach-1-1">
+                    <title>Start the game</title>
+                    <plain-description>That's right, that's the whole achievo.</plain-description>
+                    <secret/>
+                    <external-data>ev.onStart</external-data>
+                    <points>100</points>
+                </achievement>
+                <achievement id-self="ach-1-2">
+                    <title>Collector</title>
+                    <plain-description>Collect 1000 scrap. Seriously it's that easy.</plain-description>
+                    <external-data>ge(inv[scrap].quant,1000)</external-data>
+                    <points>200</points>
+                </achievement>
+                <achievement id-self="ach-1-3">
+                    <title>Colossus</title>
+                    <plain-description>Have a ship of a size at least 150 blocks.</plain-description>
+                    <external-data>ge(ship.size,150)</external-data>
+                    <points>250</points>
+                </achievement>
+                <achievement id-self="ach-1-4">
+                    <title>Conqueror</title>
+                    <plain-description>Visit all 8 main sectors.</plain-description>
+                    <external-data>each(map.mainSectors,#.visited)</external-data>
+                    <points>450</points>
+                </achievement>
+            </achievements>
+            <ingame-store>
+                <ingame-item id-self="item-1-1">
+                    <title>Room 1x1</title>
+                    <plain-description>Simple small room for your ship.</plain-description>
+                    <max-per-user>0</max-per-user>
+                    <price>20</price>
+                </ingame-item>
+                <ingame-item id-self="item-1-2">
+                    <title>Room 2x2</title>
+                    <plain-description>Simple medium room for your ship.</plain-description>
+                    <max-per-user>0</max-per-user>
+                    <price>75</price>
+                </ingame-item>
+                <ingame-item id-self="item-1-3">
+                    <title>Room 3x3</title>
+                    <plain-description>Simple large room for your ship.</plain-description>
+                    <max-per-user>0</max-per-user>
+                    <price>165</price>
+                </ingame-item>
+                <ingame-item id-self="item-1-4">
+                    <title>Leeroy Jenkins</title>
+                    <plain-description>Unique mercenary for your ship. Make sure he doesn't kill himself.</plain-description>
+                    <max-per-user>1</max-per-user>
+                    <price>250</price>
+                </ingame-item>
+            </ingame-store>
+        </game>
+        <game id-self="g-2" id-dev="dev-neverlight" rating="M">
+            <title>The Gunmagedon</title>
+            <creation-date>2021-02-01</creation-date>
+            <description>
+				Have you ever wondered how would a revolver look with incendiary ammo?
+				Maybe an acid flamethrower, or a grenade minigun?
+				Now's your chance! In this new world driven by gun tinkering and
+				prime military engineering, you can create all the weirdest and most
+				amazing guns you could ever think of.
+				Start your journey in this new, comically hostile world, fight monsters
+				and collect mods, and then stick them to your Mastergun. Make the things
+				go BOOM!, SPLASH!, RATATATA! or BZZZ! all at the same time in this
+				rogue-like gun massacre sandbox.
+				Caution: The developers are NOT responsible for any injuries caused by
+				excessive experimentation with guns. We strongly advise you to use only
+				gun modifications approved by the FUDGE (Fictional Union of Dedicated
+				Gun Enthusiasts), which you can find in the User Guide
+				                <![CDATA[<link href="https://bit.ly/39yFMpR">here</link>]]>.
+            </description>
+            <reviews>
+                <review author="u-8080">
+                    <creation-date>2021-02-01T13:51:39</creation-date>
+                    <text>10/10, would kill myself with a wasp-shooting assault rifle again</text>
+                    <comment-section/>
+                </review>
+                <review author="u-1337">
+                    <creation-date>2021-02-03T19:22:06</creation-date>
+                    <text>
+						Found minigun mod, found shotgun mod, found nuclear warhead mod.
+						Stuck then together, pressed the shot button.
+						My GPU got fried and my house caught on fire.
+						I'm currently at my friend's house, gonna try that again.
+                    </text>
+                    <comment-section/>
+                </review>
+                <review author="u-4">
+                    <creation-date>2021-02-04T00:04:43</creation-date>
+                    <text>You can pet the dog.</text>
+                    <comment-section>
+                        <comment author="u-5">
+                            <creation-date>2021-02-04T13:12:11</creation-date>
+                            <text>this^</text>
+                            <reply-section/>
+                        </comment>
+                    </comment-section>
+                </review>
+                <review author="u-7">
+                    <creation-date>2021-03-12T16:32:38</creation-date>
+                    <text>Difficult but fair. An extremely satisfying ending.</text>
+                    <comment-section/>
+                </review>
+            </reviews>
+            <achievements>
+                <achievement id-self="ach-2-1">
+                    <title>Kill Them All!</title>
+                    <plain-description>Kill 2000 enemies. I mean that's the point of this game.</plain-description>
+                    <external-data>ge(kills,2000)</external-data>
+                    <points>300</points>
+                </achievement>
+                <achievement id-self="ach-2-2">
+                    <title>Dr. OctaBOOM</title>
+                    <plain-description>Craft a gun with rocket launcher mod and 7 other mods.</plain-description>
+                    <secret/>
+                    <external-data>and(any(gun.mods,#.name==RocketLauncher),ge(gun.mods.count,8))</external-data>
+                    <points>150</points>
+                </achievement>
+                <achievement id-self="ach-2-3">
+                    <title>GrillMaster</title>
+                    <plain-description>Kill 15 enemies with fire projectiles in 8 seconds.</plain-description>
+                    <secret/>
+                    <external-data>ge(delta(kills.fire,8000),15)</external-data>
+                    <points>250</points>
+                </achievement>
+            </achievements>
+            <ingame-store>
+                <ingame-item id-self="item-2-1">
+                    <title>Rocket Launcher Mod</title>
+                    <plain-description>Simple rocket launcher mod.</plain-description>
+                    <max-per-user>0</max-per-user>
+                    <price>80</price>
+                </ingame-item>
+                <ingame-item id-self="item-2-2">
+                    <title>Minigun Mod</title>
+                    <plain-description>Simple minigun mod. Really simple.</plain-description>
+                    <max-per-user>0</max-per-user>
+                    <price>80</price>
+                </ingame-item>
+                <ingame-item id-self="item-2-3">
+                    <title>Minelayer Mod</title>
+                    <plain-description>Simple minelayer mod.</plain-description>
+                    <max-per-user>0</max-per-user>
+                    <price>80</price>
+                </ingame-item>
+                <ingame-item id-self="item-2-4">
+                    <title>Fragmine</title>
+                    <plain-description>Simple fragmine mod.</plain-description>
+                    <max-per-user>0</max-per-user>
+                    <price>120</price>
+                </ingame-item>
+                <ingame-item id-self="item-2-5">
+                    <title>Cryolator</title>
+                    <plain-description>Freezing mod for your gun.</plain-description>
+                    <max-per-user>1</max-per-user>
+                    <price>250</price>
+                </ingame-item>
+            </ingame-store>
+        </game>
+        <game id-self="g-4" id-dev="dev-sugar-powered" rating="T">
+            <title>Geneloper</title>
+            <creation-date>2021-06-03</creation-date>
+            <description>
+				In the beginning you created the heavens and the earth. 
+				Now the earth was formless and empty, darkness was over the surface of the deep, 
+				and the frown of yours was hovering over the waters.
+				
+				"Nah, that's boring", you said and moved on to some more fun stuff.
+				You made simple life and gave it a purpose: To wiggle around in your little sandbox
+				for you to do more fun stuff.
+				
+				Now you're in charge of the world. You're task is simple. Create the human-kind...
+				or whatever strikes your fancy. As long as they will worship you, I think nothing's off
+				the table. Combine organisms, alter their DNA, watch them grow and evolve. Make them weak,
+				make them agile, make them anything you want. Create your own world with your rules according
+				to your ideas. And don't forget to write a book about it. I'm sure your creations
+				will love reading about how you've created them from scratch, and how much fun you had 
+				while doing it. The world is your oyster.
+				
+				You ARE the mad scientist locked up in his basement after all.
+
+
+                If you like this game, be sure to check out our other game:
+                <general-reference id-reference="g-3">Alcheland</general-reference> here on Multiverse.
+            </description>
+            <reviews>
+                <review author="u-8080">
+                    <creation-date>2021-06-06T06:21:58</creation-date>
+                    <text>
+						I strongly dislike how everything turns to disaster no matter what I do.
+						I made my world, created some intelligent race. Later that day I start the game,
+						see they are killing other fluffy creatures with sticks. So I showed some they can eat
+						plants. They started growing their own plants and used them to lure more fluffy
+						creatures to their homes to kill them when they wanted.
+						
+						I give them sticks, they stab each other.
+						I give them healing herbs, they poison each other.
+						I give them fire, they burn each other. And make better iron sticks to stab each other.
+						I give them electricity, they make factories for robots that use sticks to stab each other.
+						Last time I gave them rocket science and now they use rockets to travel into my other
+						saved games and stab creatures there. I think I saw one of those stick-stabbers in my 
+						browser the other day. I'm no longer safe. Moving to Siberia.
+						
+						Adios.
+                    </text>
+                    <comment-section>
+                        <comment author="u-1337">
+                            <creation-date>2021-06-07T07:19:22</creation-date>
+                            <text>
+								I have a different problem. I was starting a new world with some basic
+								monad organism. Mom called for dinner so I let it run and went to eat.
+								When I came back about an hour later, my world was a chaos, all my creatures
+								were running around carrying banners saying: "God is dead".
+								Turns out my savegames got mixed up and the monad came into their game.
+								They called it the "Spanish flu" or something...
+                            </text>
+                            <reply-section>
+                                <reply author="u-8080">
+                                    <creation-date>2021-06-02T13:52:38</creation-date>
+                                    <text>
+										Hi from Siberia. I'm happy to hear I'm not the only one.
+                                    </text>
+                                </reply>
+                            </reply-section>
+                        </comment>
+                    </comment-section>
+                </review>
+            </reviews>
+        </game>
+        <game id-self="g-3" id-dev="dev-sugar-powered" rating="E10PLUS">
+            <title>Alcheland</title>
+            <creation-date>2020-11-07</creation-date>
+            <description>
+                Oh, the alchemy. How alluring would it be to throw a lizard's tail and two troll eyes into the
+                pot, only to pull out a full health potion that gives you fire breath.
+                Too bad that's just a game fantasy and you can't achieve that in reality... except..
+                Welcome to the Alcheland, the perfect alternative reality for alchemy lovers.
+                We've got potions, we've got trolls with many useful body parts! We've even got weird
+                plants that try to eat you when you're out there to collect some samples.
+
+                Set up your own alchemy shop in one of the small towns, explore the wilderness, collect
+                ingredients, then combine them in your own brass kettle. Expand your knowledge, try out the
+                ingredients (preferably on others, not yourself), inspect the side effects, learn how to bypass
+                them. Need some muscle? Cave spider broth! Now you're blind? Some tea from carnivorous plant
+                should do the trick! Your left hand grew 2 more fingers? Butcher's down the street, have a great day!
+
+                If you like this game, be sure to check out our other game:
+                <general-reference id-reference="g-4">Geneloper</general-reference> here on Multiverse.
+            </description>
+            <reviews>
+                <review author="u-2">
+                    <creation-date>2021-01-06T13:23:34</creation-date>
+                    <text>click button to receive serotonin</text>
+                    <comment-section/>
+                </review>
+                <review author="u-12">
+                    <creation-date>2020-12-06T15:24:53</creation-date>
+                    <text>So much fun</text>
+                    <comment-section>
+                        <comment author="u-12">
+                            <creation-date>2020-12-06T03:03:03</creation-date>
+                            <text>So much fun</text>
+                            <reply-section/>
+                        </comment>
+                        <comment author="u-12">
+                            <creation-date>2020-12-06T19:28:36</creation-date>
+                            <text>So much fun</text>
+                            <reply-section/>
+                        </comment>
+                        <comment author="u-12">
+                            <creation-date>2020-12-06T06:06:06</creation-date>
+                            <text>I really need friends</text>
+                            <reply-section/>
+                        </comment>
+                    </comment-section>
+                </review>
+                <review author="u-16">
+                    <creation-date>22025-12-02T12:12:13</creation-date>
+                    <text>Am I late to the party?</text>
+                    <comment-section/>
+                </review>
+            </reviews>
+        </game>
+        <game id-self="g-5" id-dev="dev-sugar-powered" id-pub="pub-capcom" rating="AO">
+            <title>Galaxy Castaway</title>
+            <creation-date>2020-04-02</creation-date>
+            <description>
+				Have you ever wondered what the far future holds?
+				If people will travel through space, create settlements on remote planets, stations that float through the eternal void?
+				In this game, you take the place of a dreamer in year 2406. The humankind has just started to colonize new worlds and create settlements.
+				And you, as a pioneer of the human kin, go on an adventure hoping to create one such colony yourself.
+				You end up on a remote asteroid rich in resources that could get you started.
+				Communicate with the Earth. Build the settlement. Expand and conquer the asteroid.
+				Mine and trade with both human race and extraterrestrial races you meet on your endeavor.
+				Create trade routes, fight off the despicable raiders trying to take everything from you.
+				Preserve, adapt, overcome!
+            </description>
+            <reviews>
+            </reviews>
+            <achievements>
+                <achievement id-self="ach-5-1">
+                    <title>Colonizer</title>
+                    <plain-description>Build the town hall. That's where it all begins.</plain-description>
+                    <external-data>any(buildings,#.type==TownHall)</external-data>
+                    <points>60</points>
+                </achievement>
+                <achievement id-self="ach-5-2">
+                    <title>The Mayor of the lightyear</title>
+                    <plain-description>Achieve 95% popularity for 3 consecutive months.</plain-description>
+                    <external-data>contdelta(ge(popularity,0.95),90)</external-data>
+                    <points>100</points>
+                </achievement>
+            </achievements>
+        </game>
+        <game id-self="g-6" id-dev="dev-neverlight" rating="M">
+            <title>IMAGeINAcTION</title>
+            <creation-date>2021-04-01</creation-date>
+            <description>
+				I, mage in action.
+				Yes, you are the mage. And you've got a magic at your disposal.
+				However, the magic bears no form or shape. That's for you to decide.
+				Each spell has to be drawn into the air. Each spell acts differently.
+				Each spell has intricate details that drastically change it.
+				As you draw a spike before you, a fireball appears that fires to distance.
+				As you draw a spike with little spiral at the end, another fireball appears, but instead circles around you, as if it's a shield of some sort.
+				Each line has its consequence. Each changes the spell. You're options are endless.
+				Now go, draw and survive. Your only limit is your IMAGeINAcTION.
+            </description>
+            <reviews>
+                <review author="u-8">
+                    <creation-date>2021-04-04T14:07:05</creation-date>
+                    <text>Gr8 game. I'm just scribbling and stuff happens lolz</text>
+                    <comment-section>
+                        <comment author="u-9">
+                            <creation-date>2021-04-06T15:24:53</creation-date>
+                            <text>Same. Dickbutt makes a homning lightning ball.</text>
+                            <reply-section/>
+                        </comment>
+                    </comment-section>
+                </review>
+            </reviews>
+        </game>
+        <game id-self="g-7" id-dev="dev-valve" rating="E">
+            <title>Half-Life 2</title>
+            <creation-date>12004-11-06</creation-date>
+            <description>
+				1998. HALF-LIFE sends a shock through the game industry with its combination 
+				of pounding action and continuous, immersive storytelling. 
+				Valve's debut title wins more than 50 game-of-the-year awards on its way 
+				to being named "Best PC Game Ever" by PC Gamer, and launches a franchise 
+				with more than eight million retail units sold worldwide.
+            </description>
+            <reviews>
+                <review author="u-8080">
+                    <creation-date>2018-05-05T12:53:27</creation-date>
+                    <text>
+						Yay, a placeholder game! So intresting!
+                    </text>
+                    <comment-section/>
+                </review>
+            </reviews>
+        </game>
+        <game id-self="g-8" id-dev="dev-valve" rating="T">
+            <title>Team Fortress 2</title>
+            <creation-date>2007-10-01</creation-date>
+            <description>
+				"The most fun you can have online" - PC Gamer
+				Is now FREE!
+				There’s no catch! Play as much as you want, as long as you like!
+            </description>
+            <reviews/>
+        </game>
+        <game id-self="g-9" id-dev="dev-thq" id-pub="pub-thq">
+            <title>Darksiders II Deathinitive Ed.</title>
+            <creation-date>2015-11-05</creation-date>
+            <description>
+				Become the terrifying force which everything fears but nothing can escape. 
+				Awakened by the End of Days, Death, the most feared of the legendary 
+				Four Horsemen embarks on a quest to redeem his brother's name. 
+				Along the way, the Horseman discovers that an ancient grudge 
+				may threaten all of Creation. Death lives!
+            </description>
+            <reviews>
+                <review author="u-1337">
+                    <creation-date>22019-12-04T13:22:47</creation-date>
+                    <text>
+						After all these years, Darksiders II remain as one of my favorite games 
+						ever, and the very best in the franchise. The company basically went 
+						bankrupt to make this game, and with good reason. Darksiders II has 
+						aged beautifully, with combat and narrative still satisfying with lore 
+						that rivals many other religion based games such as God of War and Diablo. 
+						It has always been an absolute pleasure to play this game.
+                    </text>
+                    <comment-section/>
+                </review>
+                <review author="u-12">
+                    <creation-date>22019-12-05T16:49:03</creation-date>
+                    <text>
+						This game is the reason i falled in love with the darksiders franchise.
+						Death is the most coolest character among all the Darksiders characters.
+						play this game i promise you,you wont regret it :D
+                    </text>
+                    <comment-section/>
+                </review>
+                <review author="u-3">
+                    <creation-date>12020-01-02T06:02:28</creation-date>
+                    <text>
+						Bigger than DS1, loot system and open world are 
+						both great and pain in the butt (collectibles).
+                    </text>
+                    <comment-section/>
+                </review>
+            </reviews>
+        </game>
+        <game id-self="g-10" id-dev="dev-bethesda" rating="AO">
+            <title>Fallout 4</title>
+            <creation-date>12015-11-01</creation-date>
+            <description>
+				Bethesda Game Studios, the award-winning creators of Fallout 3 and
+				The Elder Scrolls V: Skyrim, welcome you to the world of Fallout 4 – 
+				their most ambitious game ever, and the next generation of open-world gaming.
+            </description>
+            <reviews/>
+        </game>
+    </games>
+    <developers>
+        <developer id-self="dev-neverlight">
+            <name>Neverlight Studios</name>
+            <creation-date>2020-02-03</creation-date>
+            <description>
+				When the big corps no longer make the games you want,
+				you gotta make your own.
+            </description>
+        </developer>
+        <developer id-self="dev-ea">
+            <name>EA Games</name>
+            <creation-date>21982-05-02</creation-date>
+            <description>
+				You think the game was expensive? Oh boy do we have a news for you!
+            </description>
+        </developer>
+        <developer id-self="dev-sugar-powered">
+            <name>Sugar Powered</name>
+            <creation-date>2020-09-02</creation-date>
+            <description>
+				Chocolate is just an unrefined code, that's our motto.
+				Also, we're the Multiverse;.
+            </description>
+        </developer>
+        <developer id-self="dev-bethesda">
+            <name>Bethesda Softworks</name>
+            <creation-date>21986-06-08</creation-date>
+            <description>
+				That's not a bug, it's a feature!
+				Also it's not free.
+            </description>
+        </developer>
+        <developer id-self="dev-thq">
+            <name>THQ Nordic</name>
+            <creation-date>2011-01-01</creation-date>
+            <description>
+				Doing it the way it's supposed to be done.
+            </description>
+        </developer>
+        <developer id-self="dev-valve">
+            <name>Valve Corporation</name>
+            <creation-date>1996-08-04</creation-date>
+            <description>
+				We're no longer a developer really, but who cares?
+				We have better ways to get your money.
+				PS: Epic Gamez suckz -- GabeN, the almighty
+            </description>
+        </developer>
+    </developers>
+    <publishers>
+        <publisher id-self="pub-capcom">
+            <name>Capcom</name>
+            <creation-date>1979-05-03</creation-date>
+            <plain-description>
+				You know we're the good guys since we're Japanese.
+            </plain-description>
+            <website url="http://www.capcom.com/"/>
+            <!-- not HTTPS actually, which is weird -->
+        </publisher>
+        <publisher id-self="pub-thq">
+            <name>THQ Nordic</name>
+            <creation-date>2011-04-06</creation-date>
+            <plain-description>
+				Doing it the way it's supposed to be done.
+            </plain-description>
+        </publisher>
+        <publisher id-self="pub-bandai-namco">
+            <name>Bandai Namco Entertainment</name>
+            <creation-date>2006-03-01</creation-date>
+            <plain-description>
+				We've got Cyberpunk 2077, what more do you need to know?
+            </plain-description>
+            <website url="https://en.bandainamcoent.eu/"/>
+        </publisher>
+    </publishers>
+    <users>
+        <user id-self="u-8080">
+            <email>sanuelson42@gmail.com</email>
+            <pass-hash>rEK1ecacw.7.c</pass-hash>
+            <nickname>BlaWard</nickname>
+            <verified/>
+            <owned-games>
+                <owned-game id-game="g-8">
+                	<creation-date>2019-01-02T04:02:56</creation-date>
+                	<time-played>20</time-played>
+                </owned-game>
+                <owned-game id-game="g-1" id-achs="ach-1-1 ach-1-4">
+                	<creation-date>2020-11-03T12:24:38</creation-date>
+                	<time-played>20</time-played>
+                	<ingame-inventory>
+                		<inventory-item id-item="item-1-1">
+                			<quantity>2</quantity>
+                		</inventory-item>
+                		<inventory-item id-item="item-1-3">
+                			<quantity>2</quantity>
+                		</inventory-item>
+                		<inventory-item id-item="item-1-4">
+                			<quantity>1</quantity>
+                		</inventory-item>
+                	</ingame-inventory>
+                </owned-game>
+                <owned-game id-game="g-10">
+                	<creation-date>2020-11-09T02:05:58</creation-date>
+                	<time-played>20</time-played>
+                </owned-game>
+                <owned-game id-game="g-4">
+                	<creation-date>12020-11-04T12:25:48</creation-date>
+                	<time-played>20</time-played>
+                </owned-game>
+                <owned-game id-game="g-6">
+                	<creation-date>2020-11-01T13:39:09</creation-date>
+                	<time-played>20</time-played>
+                </owned-game>
+                <owned-game id-game="g-5">
+                	<creation-date>2020-10-03T15:51:15</creation-date>
+                	<time-played>20</time-played>
+                </owned-game>
+                <owned-game id-game="g-9">
+                	<creation-date>2020-10-02T12:23:58</creation-date>
+                	<time-played>20</time-played>
+                </owned-game>
+            </owned-games>
+        </user>
+        <user id-self="u-1337">
+            <email>leeroyjenkins@gmail.com</email>
+            <pass-hash>6aTj8d..1KaF2</pass-hash>
+            <nickname>Leeroy Jenkins</nickname>
+            <owned-games>
+                <owned-game id-game="g-4">
+                	<creation-date>2020-10-01T13:23:33</creation-date>
+                	<time-played>20</time-played>
+                </owned-game>
+                <owned-game id-game="g-8">
+                	<creation-date>2020-10-01T00:00:00</creation-date>
+                	<time-played>20</time-played>
+                </owned-game>
+                <owned-game id-game="g-10">
+                	<creation-date>2020-10-05T13:00:00</creation-date>
+                	<time-played>20</time-played>
+                </owned-game>
+                <owned-game id-game="g-2" id-achs="ach-2-2">
+                	<creation-date>2020-09-04T12:48:21</creation-date>
+                	<time-played>20</time-played>
+                </owned-game>
+            </owned-games>
+        </user>
+        <user id-self="u-1">
+            <email>advicepti@gmail.com</email>
+            <pass-hash>9lNio5a5zHLV</pass-hash>
+            <nickname>Adviceptal</nickname>
+            <owned-games>
+                <owned-game id-game="g-5">
+                	<creation-date>2020-09-01T14:14:14</creation-date>
+                	<time-played>20</time-played>
+                </owned-game>
+                <owned-game id-game="g-4">
+                	<creation-date>2020-09-05T15:24:35</creation-date>
+                	<time-played>20</time-played>
+                </owned-game>
+            </owned-games>
+        </user>
+        <user id-self="u-2">
+            <email>boyohboy@gmail.com</email>
+            <pass-hash>J4SCdG79GAFv</pass-hash>
+            <nickname>Ainiclie</nickname>
+            <verified/>
+            <owned-games>
+                <owned-game id-game="g-7">
+                	<creation-date>22020-08-03T12:21:22</creation-date>
+                	<time-played>20</time-played>
+                </owned-game>
+                <owned-game id-game="g-4">
+                	<creation-date>2020-08-06T15:06:04</creation-date>
+                	<time-played>20</time-played>
+                </owned-game>
+                <owned-game id-game="g-3">
+                	<creation-date>2020-08-05T13:21:54</creation-date>
+                	<time-played>20</time-played>
+                </owned-game>
+            </owned-games>
+        </user>
+        <user id-self="u-3">
+            <email>barabarab@gmail.com</email>
+            <pass-hash>R2mYx2VIzMR8</pass-hash>
+            <nickname>Alumbara</nickname>
+            <owned-games>
+                <owned-game id-game="g-7">
+                	<creation-date>12020-07-01T12:00:00</creation-date>
+                	<time-played>20</time-played>
+                </owned-game>
+                <owned-game id-game="g-10">
+                	<creation-date>2020-07-07T13:00:00</creation-date>
+                	<time-played>20</time-played>
+                </owned-game>
+                <owned-game id-game="g-2">
+                	<creation-date>2019-01-02T12:00:00</creation-date>
+                	<time-played>20</time-played>
+                </owned-game>
+                <owned-game id-game="g-3">
+                	<creation-date>2019-01-02T12:00:00</creation-date>
+                	<time-played>20</time-played>
+                </owned-game>
+                <owned-game id-game="g-8">
+                	<creation-date>2019-01-02T12:00:00</creation-date>
+                	<time-played>20</time-played>
+                </owned-game>
+                <owned-game id-game="g-5">
+                	<creation-date>2019-01-02T12:00:00</creation-date>
+                	<time-played>20</time-played>
+                </owned-game>
+                <owned-game id-game="g-9">
+                	<creation-date>2020-06-05T12:00:00</creation-date>
+                	<time-played>20</time-played>
+                </owned-game>
+                <owned-game id-game="g-4">
+                	<creation-date>2020-06-09T12:00:00</creation-date>
+                	<time-played>20</time-played>
+                </owned-game>
+                <owned-game id-game="g-6">
+                	<creation-date>2020-05-06T12:00:00</creation-date>
+                	<time-played>20</time-played>
+                </owned-game>
+                <owned-game id-game="g-1" id-achs="ach-1-2">
+                	<creation-date>2020-05-04T12:00:00</creation-date>
+                	<time-played>20</time-played>
+                	<ingame-inventory>
+                		<inventory-item id-item="item-1-3">
+                			<quantity>4</quantity>
+                		</inventory-item>
+                	</ingame-inventory>
+                </owned-game>
+            </owned-games>
+        </user>
+        <user id-self="u-4">
+            <email>mogolly.golly@gmail.com</email>
+            <pass-hash>VcCya6wc98LP</pass-hash>
+            <nickname>Mongolly</nickname>
+            <owned-games>
+            </owned-games>
+        </user>
+        <user id-self="u-5">
+            <email>papabane@gmail.com</email>
+            <pass-hash>VNDA97J1ajfG</pass-hash>
+            <nickname>Baneson</nickname>
+            <owned-games>
+            </owned-games>
+        </user>
+        <user id-self="u-6">
+            <email>unicornzz123@gmail.com</email>
+            <pass-hash>4G5YhoFWAEym</pass-hash>
+            <nickname>LeonNess</nickname>
+            <owned-games>
+                <owned-game id-game="g-2" id-achs="ach-2-1 ach-2-2 ach-2-3">
+                	<creation-date>2020-04-03T12:00:00</creation-date>
+                	<time-played>20</time-played>
+                	<ingame-inventory>
+                		<inventory-item id-item="item-2-2">
+                			<quantity>3</quantity>
+                		</inventory-item>
+                		<inventory-item id-item="item-2-1">
+                			<quantity>1</quantity>
+                		</inventory-item>
+                	</ingame-inventory>
+                </owned-game>
+                <owned-game id-game="g-1" id-achs="ach-1-4 ach-1-2">
+                	<creation-date>2020-04-05T12:00:00</creation-date>
+                	<time-played>20</time-played>
+                	<ingame-inventory>
+                		<inventory-item id-item="item-1-1">
+                			<quantity>3</quantity>
+                		</inventory-item>
+                		<inventory-item id-item="item-1-3">
+                			<quantity>1</quantity>
+                		</inventory-item>
+                		<inventory-item id-item="item-1-4">
+                			<quantity>1</quantity>
+                		</inventory-item>
+                	</ingame-inventory>
+                </owned-game>
+                <owned-game id-game="g-10">
+                	<creation-date>2020-03-05T12:00:00</creation-date>
+                	<time-played>20</time-played>
+                </owned-game>
+            </owned-games>
+        </user>
+        <user id-self="u-7">
+            <email>g4m3rgurl@gmail.com</email>
+            <pass-hash>mHoNYoEDAUx6</pass-hash>
+            <nickname>RoseShay</nickname>
+            <verified/>
+            <owned-games>
+                <owned-game id-game="g-6">
+                	<creation-date>2020-03-02T12:00:00</creation-date>
+                	<time-played>20</time-played>
+                </owned-game>
+                <owned-game id-game="g-2" id-achs="ach-2-3">
+                	<creation-date>2019-04-02T12:00:00</creation-date>
+                	<time-played>20</time-played>
+                </owned-game>
+                <owned-game id-game="g-1" id-achs="ach-1-1 ach-1-3">
+                	<creation-date>2019-03-02T12:00:00</creation-date>
+                	<time-played>20</time-played>
+                	<ingame-inventory>
+                		<inventory-item id-item="item-1-3">
+                			<quantity>4</quantity>
+                		</inventory-item>
+                	</ingame-inventory>
+                </owned-game>
+                <owned-game id-game="g-10">
+                	<creation-date>2020-01-06T12:00:00</creation-date>
+                	<time-played>20</time-played>
+                </owned-game>
+                <owned-game id-game="g-4">
+                	<creation-date>2019-05-02T12:00:00</creation-date>
+                	<time-played>20</time-played>
+                </owned-game>
+                <owned-game id-game="g-9">
+                	<creation-date>2019-06-06T12:00:00</creation-date>
+                	<time-played>20</time-played>
+                </owned-game>
+            </owned-games>
+        </user>
+        <user id-self="u-8">
+            <email>warwarwar@gmail.com</email>
+            <pass-hash>01GVpnFAW1Fb</pass-hash>
+            <nickname>VeteranUnow</nickname>
+            <verified/>
+            <owned-games>
+            </owned-games>
+        </user>
+        <user id-self="u-9">
+            <email>santzaaztan@gmail.com</email>
+            <pass-hash>n0D8N3oK13gt</pass-hash>
+            <nickname>CexeroZ</nickname>
+            <verified/>
+            <owned-games>
+                <owned-game id-game="g-1">
+                	<creation-date>2020-08-04T12:00:00</creation-date>
+                	<time-played>20</time-played>
+                </owned-game>
+                <owned-game id-game="g-3">
+                	<creation-date>2019-02-02T12:00:00</creation-date>
+                	<time-played>20</time-played>
+                </owned-game>
+                <owned-game id-game="g-5">
+                	<creation-date>2019-07-02T12:00:00</creation-date>
+                	<time-played>20</time-played>
+                </owned-game>
+                <owned-game id-game="g-6">
+                	<creation-date>2019-04-03T12:00:00</creation-date>
+                	<time-played>20</time-played>
+                </owned-game>
+            </owned-games>
+        </user>
+        <user id-self="u-10">
+            <email>beh1ndyou@gmail.com</email>
+            <pass-hash>Da86OCL7hUPk</pass-hash>
+            <nickname>Spycicle</nickname>
+            <owned-games>
+                <owned-game id-game="g-10">
+                	<creation-date>2019-01-01T12:00:00</creation-date>
+                	<time-played>20</time-played>
+                </owned-game>
+                <owned-game id-game="g-4">
+                	<creation-date>2019-12-02T12:00:00</creation-date>
+                	<time-played>20</time-played>
+                </owned-game>
+            </owned-games>
+        </user>
+        <user id-self="u-11">
+            <email>kaylaymaybouh@gmail.com</email>
+            <pass-hash>R2mYVqFIzMR8</pass-hash>
+            <nickname>Karazhanez</nickname>
+            <owned-games>
+                <owned-game id-game="g-5">
+                	<creation-date>2019-11-02T12:00:00</creation-date>
+                	<time-played>20</time-played>
+                </owned-game>
+            </owned-games>
+        </user>
+        <user id-self="u-12">
+            <email>itchsitch999@gmail.com</email>
+            <pass-hash>VcCywzEc98LP</pass-hash>
+            <nickname>GrandmaPan</nickname>
+            <verified/>
+            <owned-games>
+                <owned-game id-game="g-3">
+                	<creation-date>2020-08-08T12:00:00</creation-date>
+                	<time-played>20</time-played>
+                </owned-game>
+            </owned-games>
+        </user>
+        <user id-self="u-13">
+            <email>dem0n666@gmail.com</email>
+            <pass-hash>R5h6gUgtZeMi</pass-hash>
+            <nickname>IllidanSkywalker</nickname>
+            <owned-games>
+                <owned-game id-game="g-3">
+                	<creation-date>2019-06-08T12:00:00</creation-date>
+                	<time-played>20</time-played>
+                </owned-game>
+            </owned-games>
+        </user>
+        <user id-self="u-14">
+            <email>bruhhurb@gmail.com</email>
+            <pass-hash>4ga5YhG5oAEym</pass-hash>
+            <nickname>Cassid33</nickname>
+            <owned-games>
+            </owned-games>
+        </user>
+        <user id-self="u-15">
+            <email>bromance4ever@gmail.com</email>
+            <pass-hash>mxlCRUb2EGic</pass-hash>
+            <nickname>BroloMoon</nickname>
+            <owned-games>
+                <owned-game id-game="g-5">
+                	<creation-date>2019-11-02T12:00:00</creation-date>
+                	<time-played>20</time-played>
+                </owned-game>
+            </owned-games>
+        </user>
+        <user id-self="u-16">
+            <email>halflyfe3confirmed@gmail.com</email>
+            <pass-hash>U3P8mIfNYAP3</pass-hash>
+            <nickname>InGabenWeTrust</nickname>
+            <verified/>
+            <owned-games>
+                <owned-game id-game="g-2" id-achs="ach-2-1 ach-2-2">
+                	<creation-date>2019-04-07T12:00:00</creation-date>
+                	<time-played>20</time-played>
+                </owned-game>
+                <owned-game id-game="g-1" id-achs="ach-1-4 ach-1-2">
+                	<creation-date>2019-07-04T12:00:00</creation-date>
+                	<time-played>20</time-played>
+                	<ingame-inventory>
+                		<inventory-item id-item="item-1-4">
+                			<quantity>1</quantity>
+                		</inventory-item>
+                	</ingame-inventory>
+                </owned-game>
+                <owned-game id-game="g-10">
+                	<creation-date>2019-05-08T13:23:32</creation-date>
+                	<time-played>20</time-played>
+                </owned-game>
+            </owned-games>
+        </user>
+    </users>
+</drm>

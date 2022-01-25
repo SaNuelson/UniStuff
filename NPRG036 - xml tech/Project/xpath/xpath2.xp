@@ -1,0 +1,2 @@
+(: amount of points gained by completing exclusively secret achievements :)
+sum(drm/games/game/achievements/achievement[secret]/points/text())

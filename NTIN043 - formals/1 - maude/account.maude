@@ -1,0 +1,107 @@
+load card.maude
+
+fmod ACCOUNT is
+    protecting CARD-DATA .
+    protecting STRING .
+    protecting FLOAT .
+
+    sorts Account CardDataList .
+
+    var accHolderName : Name .
+    vars accBalance amount : Float .
+    var cardEntry : CardData .
+    var cardEntries : CardDataList .
+    var cardNum : CardNum .
+
+    op account : Name Float CardDataList -> Account .
+    op nilAccount : -> Account .
+
+    op cardList : -> CardDataList .
+    op cardList : CardData CardDataList -> CardDataList .
+
+    op getAccHolderName : Account -> Name .
+    eq getAccHolderName(account(accHolderName, accBalance, cardEntries)) = accHolderName .
+
+    op getAccBalance : Account -> Float .
+    eq getAccBalance(account(accHolderName, accBalance, cardEntries)) = accBalance .
+
+    op getCardByNum : Account CardNum -> Card .
+    eq getCardByNum(account(accHolderName, accBalance, cardEntries), cardNum) =
+        getCardByNum(cardEntries, cardNum) .
+
+    op getCardByNum : CardDataList CardNum -> Card .
+    eq getCardByNum(cardList(cardEntry, cardEntries), cardNum) = 
+        if getCardNumber(getCardDataCard(cardEntry)) == cardNum then
+            getCardDataCard(cardEntry)
+        else
+            getCardByNum(cardEntries, cardNum)
+        fi .
+    eq getCardByNum(cardList, cardNum) = nilCard .
+
+    op getPinByNum : Account CardNum -> Pin .
+    eq getPinByNum(account(accHolderName, accBalance, cardEntries), cardNum) =
+        getPinByNum(cardEntries, cardNum) .
+
+    op getPinByNum : CardDataList CardNum -> Pin .
+    eq getPinByNum(cardList(cardEntry, cardEntries), cardNum) =
+        if getCardNumber(getCardDataCard(cardEntry)) == cardNum then
+            getCardDataPin(cardEntry)
+        else
+            getPinByNum(cardEntries, cardNum)
+        fi .
+    eq getPinByNum(cardList, cardNum) = nilPin .
+
+    op hasFunds : Account Float -> Bool .
+    eq hasFunds(account(accHolderName, accBalance, cardEntries), amount) =
+        if accBalance >= amount then
+            true
+        else
+            false
+        fi .
+
+    op giveFunds : Account Float -> Account .
+    eq giveFunds(account(accHolderName, accBalance, cardEntries), amount) =
+        account(accHolderName, accBalance + amount, cardEntries) .
+
+    op takeFunds : Account Float -> Account .
+    eq takeFunds(account(accHolderName, accBalance, cardEntries), amount) =
+        account(accHolderName, accBalance - amount, cardEntries) .
+
+    var card : Card .
+    var acc : Account .
+    var pin : Pin .
+    var cnum : CardNum .
+    op hasCard : Account Card -> Bool .
+    eq hasCard(acc, card) = 
+        if getCardByNum(acc, getCardNumber(card)) =/= card then
+            false
+        else
+            true
+        fi .
+
+    op isValidPin : Account Card Pin -> Bool .
+    eq isValidPin(acc, card, pin) =
+        if getPinByNum(acc, getCardNumber(card)) == pin then
+            true
+        else
+            false
+        fi .
+
+    op isValidPin : Account CardNum Pin -> Bool .
+    eq isValidPin(acc, cnum, pin) =
+        if getPinByNum(acc, cnum) == pin then
+            true
+        else
+            false
+        fi .
+
+    --- For test purposes
+
+    op addCard : Account Card Pin -> Account .
+    eq addCard(account(accHolderName, accBalance, cardEntries), card, pin) =
+        account(accHolderName, accBalance, cardList(cardData(card, pin), cardEntries)) .
+
+    op account : Name Float -> Account .
+    eq account(accHolderName, accBalance) = account(accHolderName, accBalance, cardList) .
+
+endfm

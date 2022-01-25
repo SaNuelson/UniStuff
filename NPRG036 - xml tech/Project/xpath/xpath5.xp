@@ -1,0 +1,2 @@
+(: # of users who have gained achievements but haven't yet spend their points :)
+count(drm/users/user[owned-games/owned-game/@id-achs and not(owned-games/owned-game/ingame-inventory/inventory-item)])

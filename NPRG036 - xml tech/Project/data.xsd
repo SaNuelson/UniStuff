@@ -1,0 +1,374 @@
+<?xml version="1.0" ?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+    <xs:element name="drm">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="server-info" type="xs:string" />
+                <xs:element name="games">
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element name="game" type="TGame" minOccurs="0" maxOccurs="unbounded" />
+                        </xs:sequence>
+                    </xs:complexType>
+                </xs:element>
+                <xs:element name="developers">
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element name="developer" type="TDev" minOccurs="0" maxOccurs="unbounded" />
+                        </xs:sequence>
+                    </xs:complexType>
+                </xs:element>
+                <xs:element name="publishers">
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element name="publisher" type="TPub" minOccurs="0" maxOccurs="unbounded" />
+                        </xs:sequence>
+                    </xs:complexType>
+                </xs:element>
+                <xs:element name="users">
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element name="user" type="TUser" minOccurs="0" maxOccurs="unbounded" />
+                        </xs:sequence>
+                    </xs:complexType>
+                </xs:element>
+            </xs:sequence>
+            <xs:attribute name="owner" type="xs:string" use="required" fixed="Multiverse Games" />
+        </xs:complexType>
+
+        <xs:key name="gameKey">
+            <xs:selector xpath="games/game"/>
+            <xs:field xpath="@id-self"/>
+        </xs:key>
+
+        <xs:key name="devKey">
+            <xs:selector xpath="developers/developer"/>
+            <xs:field xpath="@id-self"/>
+        </xs:key>
+
+        <xs:key name="pubKey">
+            <xs:selector xpath="publishers/publisher"/>
+            <xs:field xpath="@id-self"/>
+        </xs:key>
+
+        <xs:key name="userKey">
+            <xs:selector xpath="users/user"/>
+            <xs:field xpath="@id-self"/>
+        </xs:key>
+
+    </xs:element>
+
+    <xs:complexType name="TGame">
+        <xs:sequence>
+            <xs:element name="title" type="TName" />
+            <xs:element name="creation-date" type="TMaybeDate" /> <!-- Valid date or "TBA" -->
+            <xs:element ref="description"/>
+            <xs:element name="reviews">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="review" type="TUserReview" minOccurs="0" maxOccurs="unbounded" />
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="achievements" minOccurs="0">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="achievement" type="TAchievement" minOccurs="0" maxOccurs="unbounded" />
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="ingame-store" minOccurs="0">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="ingame-item" type="TGameItem" minOccurs="0" maxOccurs="unbounded" />
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+        </xs:sequence>
+        <xs:attribute name="id-self" type="IDGame" />
+        <xs:attribute name="id-dev" type="IDREFDev" />
+        <xs:attribute name="id-pub" type="IDREFPub" use="optional" />
+        <xs:attribute name="rating" type="TRating" use="optional" default="RP" />
+    </xs:complexType>
+
+    <xs:complexType name="TDev">
+        <xs:sequence>
+            <xs:element name="name" type="TName" />
+            <xs:element name="creation-date" type="xs:date" />
+            <xs:element ref="description" />
+        </xs:sequence>
+        <xs:attribute name="id-self" type="IDDev" />
+    </xs:complexType>
+
+    <xs:complexType name="TPub">
+        <xs:sequence>
+            <xs:element name="name" type="TName" />
+            <xs:element name="creation-date" type="xs:date" />
+            <xs:element name="plain-description" type="TPlainDescription" />
+            <xs:element name="website" minOccurs="0">
+                <xs:complexType>
+                    <xs:attribute name="url" type="xs:anyURI"/>
+                </xs:complexType>
+            </xs:element>
+        </xs:sequence>
+        <xs:attribute name="id-self" type="IDPub" />
+    </xs:complexType>
+
+    <xs:complexType name="TUser">
+        <xs:sequence>
+            <xs:element name="email" type="TEmail" />
+            <xs:element name="pass-hash" type="TPassHash" />
+            <xs:element name="nickname" type="TNickname" />
+            <xs:element name="verified" minOccurs="0" />
+            <xs:element name="description" type="TMixedDescription" minOccurs="0" />
+            <xs:element name="owned-games">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="owned-game" type="TOwnedGame" minOccurs="0" maxOccurs="unbounded"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+        </xs:sequence>
+        <xs:attribute name="id-self" type="IDUser" />
+    </xs:complexType>
+
+    <xs:simpleType name="TName">
+        <xs:restriction base="xs:string">
+            <xs:maxLength value="30" />
+            <xs:minLength value="3" />
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:complexType name="TAchievement">
+        <xs:sequence>
+            <xs:element name="title" type="TName" />
+            <xs:element name="plain-description" type="TPlainDescription" />
+            <xs:element name="secret" minOccurs="0" />
+            <xs:element name="external-data" type="xs:string" />
+            <xs:element name="points" type="xs:nonNegativeInteger" />
+        </xs:sequence>
+        <xs:attribute name="id-self" type="IDAch" />
+    </xs:complexType>
+
+    <xs:complexType name="TGameItem">
+        <xs:sequence>
+            <xs:element name="title" type="TName" />
+            <xs:element name="plain-description" type="TPlainDescription" />
+            <xs:element name="external-data" type="xs:string" minOccurs="0" />
+            <xs:element name="max-per-user" type="xs:nonNegativeInteger" default="0" />
+            <xs:element name="price" type="xs:nonNegativeInteger" />
+        </xs:sequence>
+        <xs:attribute name="id-self" type="IDItem" />
+    </xs:complexType>
+
+    <xs:simpleType name="TPlainDescription">
+        <xs:restriction base="xs:string">
+            <xs:maxLength value="800" />
+            <xs:minLength value="20" />
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:complexType name="TMixedDescription" mixed="true">
+        <xs:sequence>
+            <xs:element name="general-reference" type="TGeneralReference" minOccurs="0" maxOccurs="unbounded" />
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="TGeneralReference">
+        <xs:simpleContent>
+            <xs:extension base="xs:string">
+                <xs:attribute name="id-reference" type="xs:IDREF" />
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+
+    <!-- author, date, text -->
+    <xs:complexType name="TUserPost">
+        <xs:sequence>
+            <xs:element name="creation-date" type="xs:dateTime" />
+            <xs:element name="text" type="xs:string" />
+        </xs:sequence>
+        <xs:attribute name="author" type="IDREFUser" />
+    </xs:complexType>
+
+    <!-- TUserPost extended by TUserPost[] -->
+    <xs:complexType name="TUserComment">
+        <xs:complexContent>
+            <xs:extension base="TUserPost">
+                <xs:sequence>
+                    <xs:element name="reply-section">
+                        <xs:complexType>
+                            <xs:sequence>
+                                <xs:element name="reply" type="TUserPost" minOccurs="0" maxOccurs="unbounded" />
+                            </xs:sequence>
+                        </xs:complexType>
+                    </xs:element>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="TUserReview">
+        <xs:complexContent>
+            <xs:extension base="TUserPost">
+                <xs:sequence>
+                    <xs:element name="comment-section">
+                        <xs:complexType>
+                            <xs:sequence>
+                                <xs:element name="comment" type="TUserComment" minOccurs="0" maxOccurs="unbounded" />
+                            </xs:sequence>
+                        </xs:complexType>
+                    </xs:element>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:simpleType name="TEmail">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="[a-zA-Z0-9_\.\+\-]+@[a-zA-Z0-9\-]+\.[a-zA-Z0-9\-\.]+"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="TPassHash">
+        <xs:restriction base="xs:string">
+            <xs:minLength value="12" />
+            <xs:maxLength value="24" />
+            <xs:pattern value="[a-zA-Z0-9.]*" />
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="TNickname">
+        <xs:restriction base="xs:string">
+            <xs:maxLength value="20"/>
+            <xs:minLength value="5"/>
+            <xs:pattern value="([0-9a-zA-Z_-]+ ?)?[0-9a-zA-Z_-]+" />
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:complexType name="TOwnedGame">
+        <xs:sequence>
+            <xs:element name="creation-date" type="xs:dateTime" />
+            <xs:element name="time-played" type="xs:decimal" />
+            <xs:element name="ingame-inventory" minOccurs="0">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="inventory-item" type="TUserItem" minOccurs="0" maxOccurs="unbounded" />
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+        </xs:sequence>
+        <xs:attribute name="id-game" type="IDREFGame" />
+        <xs:attribute name="id-achs" type="IDREFSAch" />
+    </xs:complexType>
+
+    <xs:complexType name="TUserItem">
+        <xs:sequence>
+            <xs:element name="quantity" type="xs:nonNegativeInteger" />
+        </xs:sequence>
+        <xs:attribute name="id-item" type="IDREFItem" />
+    </xs:complexType>
+
+    <xs:simpleType name="TRating">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="E" />
+            <xs:enumeration value="E10PLUS" />
+            <xs:enumeration value="T" />
+            <xs:enumeration value="M" />
+            <xs:enumeration value="AO" />
+            <xs:enumeration value="RP" />
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="TMaybeDate">
+        <xs:union>
+            <xs:simpleType>
+                <xs:restriction base="xs:date" />
+            </xs:simpleType>
+            <xs:simpleType>
+                <xs:restriction base="xs:string">
+                    <xs:enumeration value="TBA" />
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:union>
+    </xs:simpleType>
+
+    <!-- IDs -->
+    <xs:simpleType name="IDGame">
+        <xs:restriction base="xs:ID">
+            <xs:pattern value="g-[0-9]+" />
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="IDAch">
+        <xs:restriction base="xs:ID">
+            <xs:pattern value="ach-[0-9]+-[0-9]+" />
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="IDItem">
+        <xs:restriction base="xs:ID">
+            <xs:pattern value="item-[0-9]+-[0-9]+" />
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="IDDev">
+        <xs:restriction base="xs:ID">
+            <xs:pattern value="dev(-[a-z]+)+" />
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="IDPub">
+        <xs:restriction base="xs:ID">
+            <xs:pattern value="pub(-[a-z]+)+" />
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="IDUser">
+        <xs:restriction base="xs:ID">
+            <xs:pattern value="u-[0-9]+" />
+        </xs:restriction>
+    </xs:simpleType>
+
+    <!-- IDRefs -->
+    <xs:simpleType name="IDREFGame">
+        <xs:restriction base="xs:IDREF">
+            <xs:pattern value="g-[0-9]+" />
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="IDREFSAch">
+        <xs:restriction base="xs:IDREFS">
+            <xs:pattern value="(ach-[0-9]+-[0-9]+ ?)*(ach-[0-9]+-[0-9]+)?" />
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="IDREFItem">
+        <xs:restriction base="xs:IDREF">
+            <xs:pattern value="item-[0-9]+-[0-9]+" />
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="IDREFDev">
+        <xs:restriction base="xs:IDREF">
+            <xs:pattern value="dev(-[a-z]+)+" />
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="IDREFPub">
+        <xs:restriction base="xs:IDREF">
+            <xs:pattern value="pub(-[a-z]+)+" />
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="IDREFUser">
+        <xs:restriction base="xs:IDREF">
+            <xs:pattern value="u-[0-9]+" />
+        </xs:restriction>
+    </xs:simpleType>
+
+    <!-- ref -->
+    <xs:element name="description" type="TMixedDescription" />
+
+</xs:schema>

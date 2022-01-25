@@ -1,0 +1,235 @@
+load bank.maude
+
+fmod ATM is
+    protecting BANK-LIST .
+    protecting INT .
+    protecting NAT .
+    protecting BOOL .
+    protecting FLOAT .
+    protecting CARD .
+
+    sorts Atm Inventory Action Status Error .
+
+    --- Internal state related variables
+
+    var atm : Atm .
+    var atmInv : Inventory .
+    var atmInsertedCard : Card .
+    var atmLastAction : Action .
+    var atmStatus : Status .
+    var atmError : Error .
+    vars h1 h2 h5 k1 k2 : Float .
+    var worldBanks : BankList .
+
+    --- External change related variables
+
+    var readPin : Int .
+    var amount : Float .
+    var incomingCard : Card .
+    var incomingBankNotes : Inventory .
+    vars h1i h2i h5i k1i k2i : Float .
+    var dateNow : Date .
+    
+    --- Internal state including info about last action
+
+    op atm : Card Inventory Action Status Error BankList -> Atm .
+
+    op nilAction : -> Action .
+    op nilAtm : -> Atm .
+
+    --- Operating process: 
+    ---                 IDLE (expecting insertCard) [else noCardError]
+    --- + insert card = COMMunication (expecting validateCard) [else badCardError]
+    --- + valid. card = AUTHorization (expecting readPin) [else badPinError]
+    --- + insert pin  = MENU (expecting any other op) [else when withdraw noBalError, when insert cardInError]
+    --- + eject card  = IDLE
+    ops idleStatus commStatus authStatus menuStatus : -> Status .
+    ops nilError badPinError cardInError noCardError badCardError accBalError atmBalError nonAuthError : -> Error .
+
+    op inventory : Float Float Float Float Float -> Inventory .
+
+    op cardInAction : Card -> Action .
+    op cardOutAction : Card -> Action .
+    op cashInAction : Float -> Action .
+    op cashOutAction : Float -> Action .
+    op cashCheckAction : Float -> Action .
+    op valCardAction : Bool -> Action .
+    op pinCheckAction : Bool -> Action .
+    op accCheckAction : Account -> Action .
+    op invalidOpAction : -> Action .
+
+    --- Ctor ops
+
+    op initAtm : BankList -> Atm .
+    eq initAtm(worldBanks) = atm(nilCard, initInv, nilAction, idleStatus, nilError, worldBanks) .
+
+    op initInv : -> Inventory .
+    eq initInv = inventory(100.0, 100.0, 100.0, 100.0, 100.0) .
+
+    --- Interface methods
+
+    --- Insert card (requires idle status)
+    ---    add card to slot, set status if succ, set error if fail.
+    op insertCard : Atm Card -> Atm .
+    eq insertCard(atm(atmInsertedCard, atmInv, atmLastAction, atmStatus, atmError, worldBanks), incomingCard) =
+        if atmStatus == idleStatus then
+            atm(incomingCard, atmInv, cardInAction(incomingCard), commStatus, nilError, worldBanks)
+        else
+            atm(atmInsertedCard, atmInv, cardInAction(incomingCard), atmStatus, cardInError, worldBanks)
+        fi .
+
+    --- Eject card (requires non-empty card slot)
+    ---    rem card from slot, set status if succ, set error if fail.
+    op ejectCard : Atm -> Atm .
+    eq ejectCard(atm(atmInsertedCard, atmInv, atmLastAction, atmStatus, atmError, worldBanks)) =
+        if atmInsertedCard == nilCard then
+            atm(atmInsertedCard, atmInv, cardOutAction(atmInsertedCard), atmStatus, noCardError, worldBanks)
+        else
+            atm(nilCard, atmInv, cardOutAction(atmInsertedCard), idleStatus, nilError, worldBanks)
+        fi .
+
+    --- Validate card (requires comm status)
+    ---    check exp date >= now date and that bank knows card, change status if succ, error if fail.
+    op validateCard : Atm Date -> Atm .
+    eq validateCard(atm(atmInsertedCard, atmInv, atmLastAction, atmStatus, atmError, worldBanks), dateNow) =
+        if atmStatus == commStatus and
+            not isCardExpired(atmInsertedCard, dateNow) and
+            hasCard(findCardAccount(worldBanks, atmInsertedCard), atmInsertedCard) then
+            atm(atmInsertedCard, atmInv, valCardAction(true), authStatus, nilError, worldBanks)
+        else
+            atm(atmInsertedCard, atmInv, valCardAction(false), atmStatus, badCardError, worldBanks)
+        fi .
+
+    --- Check balance (requires menu status)
+    ---    save balance in atmLastAction, change error if fail.
+    op checkBalance : Atm -> Atm .
+    eq checkBalance(atm(atmInsertedCard, atmInv, atmLastAction, atmStatus, atmError, worldBanks)) =
+        if atmStatus == menuStatus then
+            atm(atmInsertedCard, atmInv, cashCheckAction(getAccBalance(findCardAccount(worldBanks, atmInsertedCard))), atmStatus, nilError, worldBanks)
+        else
+            atm(atmInsertedCard, atmInv, cashCheckAction(-1.0), atmStatus, nonAuthError, worldBanks)
+        fi .
+
+    --- Withdraw sum (requires menu status)
+    ---    check if balance >= amount, change error if fail.
+    op withdraw : Atm Float -> Atm .
+    eq withdraw(atm(atmInsertedCard, atmInv, atmLastAction, atmStatus, atmError, worldBanks), amount) =
+        if atmStatus == menuStatus then
+            if getAccBalance(findCardAccount(worldBanks, atmInsertedCard)) < amount then
+                atm(atmInsertedCard, atmInv, cashOutAction(0.0), atmStatus, accBalError, worldBanks)
+            else
+                if getTotalValue(atmInv) < amount then
+                    atm(atmInsertedCard, atmInv, cashOutAction(0.0), atmStatus, atmBalError, worldBanks)
+                else
+                    atm(atmInsertedCard, dispense(atmInv, amount), cashOutAction(amount), atmStatus, nilError, issueWithdraw(worldBanks, atmInsertedCard, amount))
+                fi
+            fi
+        else
+            atm(atmInsertedCard, atmInv, cashOutAction(0.0), atmStatus, nonAuthError, worldBanks)
+        fi .
+
+    --- Deposit sum (requires menu status)
+    ---    change error if fail.
+    op deposit : Atm Inventory -> Atm .
+    eq deposit(atm(atmInsertedCard, atmInv, atmLastAction, atmStatus, atmError, worldBanks), incomingBankNotes) =
+        if atmStatus == menuStatus then
+            atm(atmInsertedCard,
+                    addInventory(atmInv, incomingBankNotes), 
+                    cashInAction(getTotalValue(incomingBankNotes)),
+                    atmStatus,
+                    nilError,
+                    issueDeposit(worldBanks, atmInsertedCard, getTotalValue(incomingBankNotes)))
+        else
+            atm(atmInsertedCard, atmInv, cashInAction(0.0), atmStatus, nonAuthError, worldBanks)
+        fi .
+
+    --- Get account info (requires menu status)
+    ---    save info in action if succ, change error if fail.
+    op getAccountInfo : Atm -> Atm .
+    eq getAccountInfo(atm(atmInsertedCard, atmInv, atmLastAction, atmStatus, atmError, worldBanks)) =
+        if atmStatus == menuStatus then
+            atm(atmInsertedCard, atmInv, accCheckAction(findCardAccount(worldBanks, atmInsertedCard)), atmStatus, nilError, worldBanks)
+        else
+            atm(atmInsertedCard, atmInv, accCheckAction(nilAccount), atmStatus, nonAuthError, worldBanks)
+        fi .
+
+    --- Read user pin (requires auth status)
+    ---    send read pin for verification, change status if succ, change error if fail.
+    op readUserPin : Atm Int -> Atm .
+    eq readUserPin(atm(atmInsertedCard, atmInv, atmLastAction, atmStatus, atmError, worldBanks), readPin) =
+        if atmStatus == authStatus then
+            if isValidPin(findCardAccount(worldBanks, atmInsertedCard), atmInsertedCard, readPin) then
+                atm(atmInsertedCard, atmInv, pinCheckAction(true), menuStatus, nilError, worldBanks)
+            else
+                atm(atmInsertedCard, atmInv, pinCheckAction(false), authStatus, badPinError, worldBanks)
+            fi
+        else
+            if atmStatus == idleStatus then
+                atm(atmInsertedCard, atmInv, pinCheckAction(false), atmStatus, noCardError, worldBanks)
+            else
+                atm(atmInsertedCard, atmInv, pinCheckAction(false), atmStatus, badCardError, worldBanks)
+            fi
+        fi .
+
+    --- Helper methods
+
+    op getTotalValue : Inventory -> Float .
+    eq getTotalValue(inventory(h1, h2, h5, k1, k2)) =
+        h1 * 100.0 + h2 * 200.0 + h5 * 500.0 + k1 * 1000.0 + k2 * 2000.0 .
+
+    op addInventory : Inventory Inventory -> Inventory .
+    eq addInventory(inventory(h1, h2, h5, k1, k2), inventory(h1i, h2i, h5i, k1i, k2i)) =
+        inventory(h1 + h1i, h2 + h2i, h5 + h5i, k1 + k1i, k2 + k2i) .
+
+    op remInventory : Inventory Inventory -> Inventory .
+    eq remInventory(inventory(h1, h2, h5, k1, k2), inventory(h1i, h2i, h5i, k1i, k2i)) =
+        inventory(h1 - h1i, h2 - h2i, h5 - h5i, k1 - k1i, k2 - k2i) .
+
+    op sumToInv : Float -> Inventory .
+    eq sumToInv(amount) = sumToInv(amount, inventory(0.0, 0.0, 0.0, 0.0, 0.0)) .
+
+    op sumToInv : Float Inventory -> Inventory .
+    eq sumToInv(amount, inventory(h1, h2, h5, k1, k2)) =
+        if amount >= 2000.0 then
+            sumToInv(amount - 2000.0, inventory(h1, h2, h5, k1, k2 + 1.0))
+        else 
+            if amount >= 1000.0 then
+                sumToInv(amount - 1000.0, inventory(h1, h2, h5, k1 + 1.0, k2))
+            else 
+                if amount >= 500.0 then
+                    sumToInv(amount - 500.0, inventory(h1, h2, h5 + 1.0, k1, k2))
+                else 
+                    if amount >= 200.0 then
+                        sumToInv(amount - 200.0, inventory(h1, h2 + 1.0, h5, k1, k2))
+                    else 
+                        if amount >= 100.0 then
+                            sumToInv(amount - 100.0, inventory(h1 + 1.0, h2, h5, k1, k2))
+                        else
+                            inventory(h1, h2, h5, k1, k2)
+                        fi
+                    fi
+                fi
+            fi
+        fi .
+
+    op dispense : Inventory Float -> Inventory .
+    eq dispense(atmInv, amount) = remInventory(atmInv, sumToInv(amount)) .
+
+    --- For testing purposes
+    
+    op getAtmLastAction : Atm -> Action .
+    eq getAtmLastAction(atm(atmInsertedCard, atmInv, atmLastAction, atmStatus, atmError, worldBanks)) = atmLastAction .
+    
+    op getAtmStatus : Atm -> Status .
+    eq getAtmStatus(atm(atmInsertedCard, atmInv, atmLastAction, atmStatus, atmError, worldBanks)) = atmStatus .
+    
+    op getAtmError : Atm -> Error .
+    eq getAtmError(atm(atmInsertedCard, atmInv, atmLastAction, atmStatus, atmError, worldBanks)) = atmError .
+
+    op getAtmBankData : Atm -> BankList .
+    eq getAtmBankData(atm(atmInsertedCard, atmInv, atmLastAction, atmStatus, atmError, worldBanks)) = worldBanks .
+
+    op getAtmInv : Atm -> Inevntory .
+    eq getAtmInv(atm(atmInsertedCard, atmInv, atmLastAction, atmStatus, atmError, worldBanks)) = atmInv .
+
+endfm

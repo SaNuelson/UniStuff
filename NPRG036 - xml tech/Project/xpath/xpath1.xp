@@ -1,0 +1,2 @@
+(: emails of all people who have not yet bought any game :)
+/drm/users/user[not(owned-games/owned-game)]/email

@@ -1,0 +1,74 @@
+<!ELEMENT real-estate (agencies, owners, properties, flats)>
+<!ATTLIST real-estate
+	language CDATA #FIXED "EN">
+
+<!ELEMENT agencies (agency*)>
+<!ELEMENT owners (owner*)>
+<!ELEMENT properties (property*)>
+<!ELEMENT flats (flat, flat+)>
+
+<!ELEMENT agency (name, (
+	(address, email, phone) |
+	(address, phone, email) |
+	(email, address, phone) |
+	(email, phone, address) |
+	(phone, address, email) |
+	(phone, email, address)
+	), employee*)>
+
+<!ELEMENT employee (firstName, lastName)>
+<!ELEMENT firstName (#PCDATA)>
+<!ELEMENT lastName (#PCDATA)>
+
+<!ELEMENT owner (name, address)>
+<!ATTLIST owner
+	idOwner ID #REQUIRED>
+
+<!ENTITY % standardMode "INCLUDE">
+<!ENTITY % verboseMode "IGNORE">
+
+<![ %standardMode; [
+	<!ELEMENT property (name, address, numberOfFlats, features?, employee?)>
+	]]>
+
+<![ %verboseMode; [
+	<!ELEMENT property (name, address, description, numberOfFlats, features?, employee?)>
+	]]>
+
+<!ATTLIST property
+	idProperty ID #REQUIRED
+	owner IDREF #IMPLIED>
+
+<!ELEMENT flat (name, rate, data, features?, record*, flat*)>
+<!ATTLIST flat
+	idFlat ID #REQUIRED
+	property IDREF #REQUIRED
+	comfort (A | B | C | D | E | F) "F">
+
+<!ELEMENT name (#PCDATA)>
+<!ELEMENT email (#PCDATA)>
+<!ELEMENT phone (#PCDATA)>
+<!ELEMENT numberOfFlats (#PCDATA)>
+<!ELEMENT rate (#PCDATA)>
+
+<!ELEMENT features (feature, feature, feature?, feature?, feature?)>
+<!ELEMENT feature (#PCDATA)>
+
+<!ELEMENT record ((date, text) | record+)>
+<!ELEMENT date (#PCDATA)>
+<!ELEMENT text (#PCDATA)>
+
+<!ELEMENT description (#PCDATA | flatReference)*>
+<!ELEMENT flatReference (#PCDATA)>
+<!ATTLIST flatReference
+	flatName IDREF #REQUIRED>
+
+<!ELEMENT data ANY>
+
+<!ELEMENT address (street, ((postalCode, state, country) | (state, postalCode)))>
+<!ELEMENT street (#PCDATA)>
+<!ELEMENT postalCode (#PCDATA)>
+<!ELEMENT state (#PCDATA)>
+<!ELEMENT country (#PCDATA)>
+
+<!ENTITY sup2 "²">

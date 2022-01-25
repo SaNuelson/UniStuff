@@ -1,0 +1,61 @@
+fmod CARD is
+    protecting NAT .
+    protecting STRING .
+    protecting INT .
+
+    sorts Card Name CardNum Date .
+    subsort Nat < Date .
+    subsort Nat < CardNum .
+    subsort String < Name .
+
+    var holderName bankName : Name .
+    var cardNum : CardNum .
+    var expDate, expDate2 : Date .
+
+    op card : Name Name CardNum Date -> Card .
+    op nilCard : -> Card .
+
+    op getCardBankName : Card -> Name .
+    eq getCardBankName(card(bankName, holderName, cardNum, expDate)) = bankName .
+
+    op getCardHolderName : Card -> Name .
+    eq getCardHolderName(card(bankName, holderName, cardNum, expDate)) = holderName .
+
+    op getCardNumber : Card -> CardNum .
+    eq getCardNumber(card(bankName, holderName, cardNum, expDate)) = cardNum .
+
+    op getCardExpDate : Card -> Date .
+    eq getCardExpDate(card(bankName, holderName, cardNum, expDate)) = expDate .
+
+    op isCardExpired : Card Date -> Bool .
+    eq isCardExpired(card(bankName, holderName, cardNum, expDate), expDate2) =
+        if expDate < expDate2 then
+            true
+        else
+            false
+        fi .
+
+endfm
+
+--- Wrapper for card holding additional info like PIN .
+fmod CARD-DATA is
+
+    protecting CARD .
+    
+    sorts CardData Pin .
+    subsort Nat < Pin .
+
+    var card : Card .
+    var pin : Pin .
+
+    op cardData : Card Pin -> CardData .
+
+    op nilPin : -> Pin .
+
+    op getCardDataCard : CardData -> Card .
+    eq getCardDataCard(cardData(card, pin)) = card .
+
+    op getCardDataPin : CardData -> Pin .
+    eq getCardDataPin(cardData(card, pin)) = pin .
+
+endfm

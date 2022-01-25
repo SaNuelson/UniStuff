@@ -1,0 +1,105 @@
+module TestSuiteSimple
+
+imports 
+	from Main
+		functions
+			createEmitter renamed newEmitter ;
+			createAbsorber renamed newAbsorber ;
+			createCondition renamed newCondition ;
+			createAction renamed newAction ;
+			createInteraction renamed newInteraction ;
+			createSystem renamed newSystem ;
+			observe renamed withEvent;
+			updateSystem renamed update;
+			check renamed check;
+			showInputs renamed showInputs;
+			showOutputs renamed showOutputs,
+
+	from Utils
+		functions
+			lessThan renamed lt;
+			lessOrEqualTo renamed le;
+			equalTo renamed eqt;
+			greaterThan renamed gt;
+			greaterOrEqualTo renamed ge;
+
+definitions
+	
+	values
+	
+		sensor1 = newEmitter("S1", "", 0, 0, 1);
+		sensor2 = newEmitter("S2", "", 0, 0, 1);
+		
+		control1 = newAbsorber("A1", "", 0, 0, 1);
+		control2 = newAbsorber("A2", "", 0, 0, 1);
+		control3 = newAbsorber("A3", "", 0, 0, 1);
+		control4 = newAbsorber("A4", "", 0, 0, 1);
+		control5 = newAbsorber("A5", "", 0, 0, 1);
+		
+		condition1 = newCondition("S1", eqt(1));
+		conditionNot1 = newCondition("S1", eqt(0));
+		condition2 = newCondition("S2", eqt(1));
+		conditionNot2 = newCondition("S2", eqt(0));
+		
+		action1 = newAction("A1", 1);
+		actionNot1 = newAction("A1", 0);
+		action2 = newAction("A2", 1);
+		actionNot2 = newAction("A2", 0);
+		action3 = newAction("A3", 1);
+		actionNot3 = newAction("A3", 0);
+		action4 = newAction("A4", 1);
+		actionNot4 = newAction("A4", 0);
+		action5 = newAction("A5", 1);
+		actionNot5 = newAction("A5", 0);
+		
+		-- S1 <=> A1
+		s1_impl_a1 = newInteraction({condition1},[action1]);
+		ns1_impl_na1 = newInteraction({conditionNot1},[actionNot1]);
+		-- S2 <=> A2
+		s2_impl_a2 = newInteraction({condition2},[action2]);
+		ns2_impl_na2 = newInteraction({conditionNot2},[actionNot2]);
+		-- S1 & S2 <=> A3
+		s1_and_s2_impl_a3 = newInteraction({condition1, condition2},[action3]);
+		ns1_or_ns2_impl_na3 = newInteraction({conditionNot1, conditionNot2},[actionNot3]);
+		-- S1 | S2 <=> A4
+		s1_impl_a4 = newInteraction({condition1},[action4]);
+		s2_impl_a4 = newInteraction({condition2},[action4]);
+		ns1_and_ns2_impl_na4 = newInteraction({conditionNot1, conditionNot2},[actionNot4]);
+		-- S1 xor S2 <=> A5
+		ns1_and_s2_impl_a5 = newInteraction({conditionNot1, condition2}, [action5]);
+		s1_and_ns2_impl_a5 = newInteraction({condition1, conditionNot2}, [action5]);
+		s1_and_s2_impl_na5 = newInteraction({condition1, condition2}, [actionNot5]);
+		ns1_and_ns2_impl_na5 = newInteraction({conditionNot1, conditionNot2},[actionNot5]);
+		
+		allEmitters = {sensor1, sensor2};
+		allAbsorbers = {control1, control2, control3, control4, control5};
+		allDevices = allEmitters union allAbsorbers;
+		
+		allInteractions = [
+			s1_impl_a1, ns1_impl_na1, 
+			s2_impl_a2, ns2_impl_na2, 
+			s1_and_s2_impl_a3, ns1_or_ns2_impl_na3, 
+			s1_impl_a4, s2_impl_a4, ns1_and_ns2_impl_na4,
+			ns1_and_s2_impl_a5, s1_and_ns2_impl_a5, s1_and_s2_impl_na5, ns1_and_ns2_impl_na5
+		];
+		
+		testSystem = newSystem(allDevices, allInteractions);
+	functions
+			
+		testMain : () -> bool
+		testMain() ==
+			let
+				sys0 = testSystem,               -- Emt(0, 0) => Abs(0, 0, 0, 0, 0)
+				sys1 = withEvent(sys0, "S1", 1), -- Emt(1, 0) => Abs(1, 0, 0, 1, 1)
+				sys2 = withEvent(sys1, "S2", 1), -- Emt(1, 1) => Abs(1, 1, 1, 1, 0)
+				sys3 = withEvent(sys2, "S1", 0), -- Emt(0, 1) => Abs(0, 1, 0, 1, 1)
+				sys4 = withEvent(sys3, "S2", 0)  -- Emt(0, 0) => Abs(0, 0, 0, 0, 0)
+			in
+				check(sys0, "A1") = 0 and	check(sys0, "A2") = 0 and	check(sys0, "A3") = 0 and	check(sys0, "A4") = 0 and check(sys0, "A5") = 0 and
+				check(sys1, "A1") = 1 and	check(sys1, "A2") = 0 and	check(sys1, "A3") = 0 and	check(sys1, "A4") = 1 and check(sys1, "A5") = 1 and
+				check(sys2, "A1") = 1 and	check(sys2, "A2") = 1 and	check(sys2, "A3") = 1 and	check(sys2, "A4") = 1 and check(sys2, "A5") = 0 and
+				check(sys3, "A1") = 0 and	check(sys3, "A2") = 1 and	check(sys3, "A3") = 0 and	check(sys3, "A4") = 1 and check(sys3, "A5") = 1 and
+				check(sys4, "A1") = 0 and	check(sys4, "A2") = 0 and	check(sys4, "A3") = 0 and	check(sys4, "A4") = 0 and check(sys4, "A5") = 0;
+				
+
+end TestSuiteSimple
