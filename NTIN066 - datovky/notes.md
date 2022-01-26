@@ -283,7 +283,7 @@ $$
 
 ![](res/hashing_chaining.png)
 
-- hash tables elements are linked lists
+- hash tables elements are linked lists (or other types of data structures like BST)
 - if collision happens, new item is appended at the end of that list
 
 ### Linear probing
@@ -316,7 +316,7 @@ $$
 $$
     Pr[b_i=k] = Pr[\textrm{"i-th bin has k balls"}] = {n \choose k} \left(\frac{1}{n}\right)^k\left(1-\frac{1}{n}\right)^{n-k}
 $$
-  - if $k << n$
+  - if $k \ll n$
 $$
     Pr[b_i=k] \approx \frac{n^k}{n!}(\cdot\frac{1}{n})^k\cdot\frac{1}{e}=\frac{1}{ek!}
 $$
@@ -435,6 +435,32 @@ Insert(x):
 - Find(x) $\in O(1)$ - worst case
 - Delete(x) $\in O(1)$ - worst case
 - Insert(x) $\in O(1)$ - average case
+- works best for $m \ge 2n$
+- rehashing can occur after as little as $6 \log n$ cuckoo inserts
+
+## Iceberg hashing
+
+- uses linear probing with **B-tree** as a complementary data structure
+- sets $m = \frac{n}{\log^3 n}$
+- uses 2 hash functions
+  - $h_1: U \Rightarrow [m]$
+    - maps items to buckets
+  - $h_2: U \Rightarrow [\log^{10}n]$
+    - used to organize within B-trees (buckets)
+    - $h_2(x)$ has $\log(\log^{10}n) = 10\log\log n$ bits
+    - that ensures each key in B-trees fit in $O(\log n)$ bits in memory
+- for B-tree sets $B = \sqrt{\log n}$
+- each B-tree can hold up to $\log^3 n + C \log^2 n$ for well chosen constant $C$
+  - when keys are inserted into full tree, some are put into "**backyard**"
+- $Pr[\textrm{"i-th bucket overflows"}] \le 1/n^{c'}$
+  - where $c'$ is dependent on chosen $C$
+  - via Chernoff bounds
+- when collision happens within a B-tree, both items are put into **backyard
+$$
+  Pr[\textrm{"collision happens in i-th bucket"}] \\
+  \le {\log^3 n + C \log^2 n \choose 2} \cdot \frac{1}{\log^{10} n} \\
+  \le O\left(\frac{1}{\log^4 n}\right)
+$$
 
 # Working with strings
 
@@ -481,22 +507,22 @@ Insert(x):
     - teda sú k-rovné/menšie, práve keď ich prefixy dĺžky $k$ sú rovné/menšie
   - následne vykonáme $O(\log m)$ prechodov, v ktorých zoradíme sufixy podľa ich prefixov dĺžky $k = 2^i$
   - $i$-ty prechod teda usporiada sufixy podľa $\le_{2^i}$
-  - v $1$. prechode zoradíme sufixy podľa ich prvého znaku pomocou nejakého sort algoritmu v čase $O(m \log m)$
+  - v $0$. prechode zoradíme sufixy podľa ich prvého znaku pomocou nejakého sort algoritmu v čase $O(m \log m)$
   - v $i+1$. kroku máme sufixy zoradené podľa $\le_{2^i}$, chceme zoradiť podľa $\le_{2^{i+1}}$
     - tu možno použiť práve fakt, že slová na sebe závisia.
     - $
-  a_i \le_{2k} a_j \Leftrightarrow (a_i \le_k a_j) \vee ((a_i =_k a_j) \wedge (a_{i+k} \le_k a_{j+k}))$
+  a_i \le_{2k} a_j \Leftrightarrow (a_i <_k a_j) \vee ((a_i =_k a_j) \wedge (a_{i+k} \le_k a_{j+k}))$
     - teda, 2 nezoradené sufixy možno zoradiť rekurzívne, keďže bez prefixov sú to "iné sufixy" toho istého slova, ktoré sú už podľa $\le_k$ zoradené
 
 > Example:  
 > $T = tatar$  
 > suffixes $= [tatar, atar, tar, ar, r, \lambda]$  
-> - $i = 1$:
+> - $i = 0$:
 >   - $\lambda\le_1\{atar,ar\}\le_1r\le_1\{tatar, tar\}$
-> - $i = 2$:
+> - $i = 1$:
 >   - $\lambda \le_2 ar \le_2 atar \le_2 r \le_2 \{tatar, tar\}$
 >     - $ar \le_2 atar \Leftarrow (ar =_1 atar) \wedge (r \le_1 tar)$
-> - $i = 3$:
+> - $i = 2$:
 >   - $\lambda \le_4 ar \le_4 atar \le_4 r \le_4 tar \le_4 tatar$
 >     - $tar \le_4 tatar \Leftarrow (tar =_2 tatar) \wedge (r \le_2 tar)$
 
@@ -556,3 +582,86 @@ Insert(x):
   - directed cycles here mean **deadlocks**
 - we can **order** mutexes topologically to insure there's always at least one process not being blocked
   - this can not always be done for example if the edges can be set dynamically by the data (e.g. data contains its destination)
+
+# Geometric Data Structures
+
+- multi-dimensional items
+  - points, lines, polygons... in $R^d$
+- queries can ask for **region**
+  - a single object - analogic to lookup
+  - a range - $d$-dimensional box, potentially infinite in some directions
+  - partial match - bounds only some dimensions (e.g. $x=3 \vee z=5$)
+  - polygon
+- queries can return all items or their count
+
+## 1-D
+
+### K-D trees
+
+- binary search trees
+- used to store $K$-dimensional data
+- $K = 1$
+  ![](res/kd_tree_1d.png)
+  - each internal node sets a **split point** between its subtrees
+  - range query again $O(\log n + k)$ in **balanced** tree
+    - find **splitting points** $(x,x')$ such that $x$ not in range, $x'$ in range both for min and max in time $O(\log n)$
+    - enumerate all nodes inbetween in time $O(k)$, taking advantage of paths to splitting points
+- $K = 2$
+  ![](res/kd_tree_2d.png)
+  - assume no points share the same axis (e.g. we can rotate all or shift by small $\epsilon$)
+  - internal nodes split space in the following way
+    - **odd-level** nodes split items based on their position on $X$ axis
+    - **even-level** nodes split items based on their position on $Y$ axis
+  - tree height is $\log n \pm 1 \in O(\log n)$
+  - **Construction**
+    - need $O(\log n)$ passes
+    - in each, find median for each group, summed in time $O(n)$
+    - together construct in time $O(n \log n)$ in $O(n)$ space
+  - **Find**
+  ```
+  Find(v : vertex, r : interval)
+    In:
+      v .. vertex of kd-tree
+      r .. desired interval
+    Out:
+      all vertices lying in r from subtree of v
+
+    if v is leaf then
+      if v in r then
+        return [v]
+      else
+        return []
+    
+    if all vertices of subtree of l(v) in r then
+      return subtree of l(v)
+    if some vertices of subtree of l(v) in r then
+      return Find(l(v), r)
+
+    if all vertices of subtree of r(v) in r then
+      return subtree of r(v)
+    if some vertices of subtree of r(v) in r then
+      return Find(r(v), r)
+  ```
+    - time complexity
+      - return whole subtree in $O(k)$ time
+      - recursion in $O(\sqrt n + k)$ time
+        - why $\sqrt n$ you ask
+        - consider thick strip "avoiding" all leafs
+        - each odd level takes one path
+        - each even level takes both paths
+        - at leaf level $t$ nothing gets returned
+        - but we still branched in recursion by $2$ in every $2$-nd level, reaching $2^{t/2} = \sqrt{2^t} \approx \sqrt n$ leafs
+        ![](res/kd_tree_2d_complexity.png)
+        - generally, for $K \ge 2$ using similar range query (small for one dimension, avoiding all data), we branch in recursion at all but every $K$-th level of the tree, reaching $2^{t - t/K} \in O(n^{1-1/K})$ leafs.
+
+### Range trees
+
+- instead of alternating between axes, range tree sorts by the first axis with each vertex connecting to another tree which sorts its corresponding points according to their second dimension, etc.
+![](res/range_tree.png)
+- Search
+  - $O(\log^d n)$
+    - passes tree of size $n$ for each of $d$ dimensions
+- Space
+  - $O(n \log^{d-1} n)$
+- Range
+  - $O(\log^{d-1} n)
