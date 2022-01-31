@@ -33,6 +33,35 @@ In other words, amortized complexity says what's the upper bound of operation co
 We claim that **amortized cost** $A = 3$ ($k$ operations take $\le 3k$ time).
 Further, the **real cost** $R$ is at most $A$.
 
+Let's set $s_0, s_1, \dots$ sequence of operations on the flexible array.  
+Let $c_i$ be the capacity of array after operation $i$. E.g., if we only consider insert operations $c$ changes during step $i=2^k$ ($c_{new}=2c_{old}$)
+
+We easily see that the real cost $R$ of an operation is either: 
+$$
+  R_i = \left\{
+  \begin{array}{cl}
+    i + 1 & \textrm{when expanding (copy + insert)} \\
+    1 & \textrm{otherwise}
+  \end{array} \right.
+$$
+
+Let's set the potential 
+$$\Phi_i = 2(i - c/2) = 2i - c$$
+The thought being that we need $2$ points each inserted element. $1$ for adding it, and $1$ for later when we'll need to move it during expansion.
+
+Now we show that amortized cost $A \le 3$ as we claim.
+
+$A_i = R_i + \Delta \Phi_i$  
+$A_i = R_i + (\Phi_i - \Phi_{i-1})$
+
+We again have 2 cases.:
+- when simply adding element ($i\ne2^k$)  
+  $A_i = 1 + ((2i - c) - (2(i - 1) - c) = 3$
+- and when also expanding  
+  $A_i = (i + 1) + ((2i - c_{new}) - (2(i - 1) - c_{old}))$  
+  $A_i = i + 1 + 2i - 2c - 2i + 2 + c = 3$
+  - as $c_{new}=2c_{old}$ and $i=c_{old}$
+
 ## Weight-balanced tree
 
 - Define:
@@ -40,45 +69,153 @@ Further, the **real cost** $R$ is at most $A$.
   - $r(v)$ - right child of vertex $v$
   - $s(v)$ - number of vertices in subtree with root $v$ (incl. $v$)
 - Then:
-  - tree is $\alpha$-weight-balanced iff $\forall v:s(l(v)) \le \alpha s(v) \wedge s(r(v)) \le \alpha s(v)$
+  - tree is $\alpha$-weight-balanced iff $\forall v:$
+  $$s(l(v)) \le \alpha s(v) \wedge s(r(v)) \le \alpha s(v)$$
 - we consider case $\alpha = \frac{2}{3}$
-- depth $d \le \log_{2/3}\frac{1}{n} = \log_{3/2}n \in O(\log n)$
+
+### Find(x)
+- works in time $O(\log n)$
+- depth is
+  $$d \le \log_{2/3}\frac{1}{n} = \log_{3/2}n \in O(\log n)$$
   - because:
     - consider path from root to some leaf
     - at maximum, each next step goes into subtree of size $\frac{2}{3}s(v)$
     - in such case in leaf we reach subtree of size $\left(\frac{2}{3}\right)^d n = 1$
 
+### Insert(x)
+- works in time $O(\log n)$
+- step where invariant is not broken, it simply takes $O(\log n) + O(1)$ to find a place and insert
+- step where invariant is broken:
+  - it means that for some subtree of some vertex $v$ we get w.l.o.g. 
+    $$s(l(v))>\frac{2}{3}s(v)$$
+  - it also means that
+    $$s(r(v)) = s(v) - s(l(v) < \frac{1}{3}s(v)$$
+  - we can pick highest such $v$ (with biggest subtree) as the invariant could only be broken by increasing subtrees along the path where new item was inserted
+  - then we can rebuild it in $O(s(v))$ time (e.g. using altered DFS to make it into a sorted array and create subtree using it)
+  - let's define potential as
+    $$\Phi = C\sum_v r(v)$$
+    for some well-chosen constant $C$, where
+    $$
+    r(v) = \left\{
+    \begin{array}{cl}
+      |s(l(v) - s(r(v))| * & \textrm{when the term} * \textrm{is} \ge 2 \\
+      0 & \textrm{otherwise}
+    \end{array} \right.
+    $$
+  - during the step where no rebalancing is made, potential increases by $O(\log n)$
+    - that is because the only vertices $v$ along path are affected, where the term $*$ can increase by at most $1$ (and therefore $r(v)$ can at most jump by $2$)
+  - during the step where rebalancing is made, potential changes by $\Delta\Phi \le C\frac{s(x)}{3}$, where $x$ is the highest vertex along path of insertion, where invariant is broken
+    - that is because whole subtree of $x$ is rebalanced, thereby reaching $r(x)=0$ (as well as $r(v) = 0$ for all descendants of $x$). As we know the invariant is broken, using our observations from before:
+    $$s(l(v)) > \frac{2}{3}s(r(v)) \wedge s(r(v)) < \frac{1}{3}s(v)$$
+    $$\implies s(l(v)) - s(r(v)) > \frac{1}{3}s(v)$$
+    - then, by rebuilding the subtree we lower the potential by $>s(v)$
+  - altogether we get
+    $$
+      A_i = \left\{
+      \begin{array}{cl}
+        O(\log n) + O(\log n) & \textrm{non-balancing step} \\
+        O(s(x) + \log n) - C\frac{s(x)}{3} & \textrm{balancing step}
+      \end{array} \right.
+    $$
+    therefore
+    $$A_i = O(\log n)$$
+
 ## Splay trees
+
+- trees where **all operation splay a node** (move it to the root)
+  - when searcing, searched node is splayed
+  - when inserting, new node is splayed
+  - when deleting, splay either deleted node succesor or predecessor
+- utilizes rotations to splay, most importantly **double rotations**
+  - **ZIG-ZIG**  
+    ![](res/splay_zig_zig.png)
+    - when node is on the "same side" as parent
+    - **rotate(p,g)** then **rotate(x,g)**
+  - **ZIG-ZAG**  
+    ![](res/splay_zig_zag.png)
+    - when node is on the "other side" as parent
+    - **rotate(x,p)** then **rotate(x,g)**
+  - **ZIG**  
+    ![](res/splay_zig.png)
+    - when node's parent is root
+- when splaying a node, all below move approximately half-way closer to root
+- let's define
+  - $T(v)$ **subtree** of $v$
+  - $s(v) = |T(v)|$ **size** of subtree of $v$
+  - $r(v) = \log s(v)$ **rank** of $v$
+  - $\Phi = \sum_v r(v)$ potential as sum of ranks
+- Splay(x)
+  - we claim that $A \le 3(r'(x)-r(x)) + 1$, where $r'(x)$ is rank after operation
+  - to prove this, we look at all rotations in detail
+  - real cost $R$ is $2$ for zig-zig and zig-zag, $1$ for zig
+  - $\Delta\Phi$ is only dependent on ranks of $x, p$ and $g$
+    - all vertices in sub-trees A, B, C, D don't change at all
+    - all vertices whose sub-trees contain $x,p,g$ (and in turn the whole sub-tree we're analyzing) do change in structure, but their sizes also remain the same
+  - one important fact used here is that
+    $$\log\frac{\alpha+\beta}{2} \ge \frac{\log a + \log b}{2}$$
+    that simply comes from the fact that logarithmic function is convex and therefore it holds that mean value of two function values is at most function value of their mean
+  - **ZIG-ZIG**
+    $$A = 2 + r'(x) - r(x) + r'(p) - r(p) + r'(g) - r(g)$$
+    $s'(x) = s(g) \implies r'(x) = r(g)$
+    $$A = 2 + r'(p) + r'(g) - r(x) - r(p)$$
+    now we see that  
+    $s(x) + s'(g) + 1 = s'(x)$  
+    using the logarithm inequality:  
+    $r(x) + r'(g) = \log(s(x)) + \log(s(g)) \le 2 \log \frac{s(x) + s(g)}{2} \le 2r'(x) - 2$  
+    so we get  
+    $r'(g) \le 2r'(x) - r(x) - 2$
+    $$A \le 2r'(x) - 2r(x) + r'(p) - r(p)$$
+    next we easily see that $r'(p)<r'(x)$ and $r(p)<r(x)$
+    $$A \le 3r'(x) - 3r(x)$$
+  - **ZIG-ZAG**
+    $$A = 2 + r'(x) - r(x) + r'(p) - r(p) + r'(g) - r(g)$$
+    similarly to ZIG-ZIG  
+    $s'(p) + s'(g) + 1 = s'(x)$  
+    so analogically  
+    $r'(p) + r'(g) \le 2r'(x) - 2$
+    $$A \le 3r'(x) - r(x) - r(p) - r(g)$$
+    now to achieve claim, we easily see that $r(p) > r(x)$ and $r(g) > r(x)$
+    $$A \le 3r'(x) - 3r(x)$$
+  - **ZIG**
+    $$A = 1 + r'(x) + r'(p) - r(x) - r(p)$$
+    it is easy to see that $r'(x) > r'(p)$ and $r(x) < r(p)$
+    $$A \le 2r'(x) - 2r(x) + 1 \le 3(r'(x) - r(x)) + 1$$
+    as $r'(x) \ge r(x)$
 
 ## (a,b)-trees
 
-- $O(n)$ štepení pri $n$ insertoch do prázdneho stromu
-- ak $b \ge 2a$, tak počet štepení/zlievaní pri $m$ insertoch a $l$ deletoch je $O(m + l)$
-
-$\Phi = 2 \cdot \#a + 1 \cdot \#(a+1) + 2 \cdot \#(b-1) + 4 \cdot \#b$,  
-    kde $\#a =$ počet vrcholov majúcich $a$ potomkov v strome
+- $O(n)$ splits during $n$ inserts into an empty tree
+- if $b \ge 2a$, then the number of splits/merges during $m$ inserts and $l$ deletes is $O(m+l)$
+- let's define
+  - $\Phi = 2 \cdot \#a + 1 \cdot \#(a+1) + 2 \cdot \#(b-1) + 4 \cdot \#b$,  
+    where $\#a =$ number of vertices which have $a$ descendants
 
 ### Insert
 
 ![](res/ab_insert.png)
 
-- máme $t$ vrcholov s $b$ synmi, kt. sa rozštipia na $2t$ vrcholov, aspoň $t$ z nich bude mať $\ge a+1$ a $\le b-1$ synov.
-- teda:
-  - zanikne **určite** $t$ vrcholov v $\#b$
-    - $-4t$
-  - vznikne **najviac** $t$ vrcholov v $\#a$
-    - $+2t$
-  - vznikne **najviac** $t$ vrcholov v $\#(a+1)$
-    - $+1t$
-  - vznikne **možno** $1$ vrchol (koreň) v $\#b$
-    - $+4$
-- $\Delta\Phi \le - 4t + 2t + 1t + 4 = 4 - t$
-- $R = 1 + t$ (insert + splity)
-- $A \le 5$
+- consider an arbitrary insert which triggers splitting
+- w.l.o.g. split propagates through $t$ vertices
+  - each of them has to contain $b$ children in order to be split
+  - by definition, by splitting them we obtain $2$ new vertices for each of them, of sizes $\ge a$ and $a+1$ respectively
+  - additionally, the first node along the path **not** to split was of size $<b$, but after increased by $1$, therefore can be of size $\le b$
+- now we consider the upper bound of $\Delta\Phi$ (as we're trying to find the upper bound of amortized complexity)
+  - $t$ nodes in $\#b$ are lost exactly
+  - $t$ vertices in $\#a$ are added at most 
+  - $t$ vertices in $\#(a+1)$ are added at most
+  - $1$ vertex in $\#b$ is added at most
+- altogether
+  - $\Delta\Phi \le - 4t + 2t + 1t + 4 = 4 - t$
+  - $R = 1 + t$ (insert + splits)
+  - $A \le 5$
 
 ### Delete
 
 ![](res/ab_delete.png)
+
+- consider an arbitrary delete which triggers merging
+- w.l.o.g. merging propagates through $s$ levels
+  - each level contains $2$ neighboring nodes of size $a$
 
 - máme $s$ dvojíc vrcholov s $a$ synmi, kt. sa spoja do $s$ vrcholov s $2a-1$ synmi
 - teda:
@@ -600,14 +737,15 @@ $$
 
 - binary search trees
 - used to store $K$-dimensional data
-- $K = 1$
+- $K = 1$  
   ![](res/kd_tree_1d.png)
   - each internal node sets a **split point** between its subtrees
   - range query again $O(\log n + k)$ in **balanced** tree
     - find **splitting points** $(x,x')$ such that $x$ not in range, $x'$ in range both for min and max in time $O(\log n)$
     - enumerate all nodes inbetween in time $O(k)$, taking advantage of paths to splitting points
-- $K = 2$
+- $K = 2$  
   ![](res/kd_tree_2d.png)
+  > TODO: Wrong image, we consider leaf-only kd trees
   - assume no points share the same axis (e.g. we can rotate all or shift by small $\epsilon$)
   - internal nodes split space in the following way
     - **odd-level** nodes split items based on their position on $X$ axis
@@ -664,4 +802,4 @@ $$
 - Space
   - $O(n \log^{d-1} n)$
 - Range
-  - $O(\log^{d-1} n)
+  - $O(\log^{d-1} n)$
