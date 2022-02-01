@@ -1,3 +1,12 @@
+<style>
+  doubt {
+    color: orange;
+    display: inline-block;
+    border: 1px solid orange;
+    padding: 2px;
+  }
+</style>
+
 # Preliminaries
 
 - **data structure** - black box containing some **data** and providing certain **operations** on top of it
@@ -63,6 +72,8 @@ We again have 2 cases.:
   - as $c_{new}=2c_{old}$ and $i=c_{old}$
 
 ## Weight-balanced tree
+
+- "a binary search tree which rebalances only parts of itself which degrade too much"
 
 - Define:
   - $l(v)$ - left child of vertex $v$
@@ -144,58 +155,135 @@ We again have 2 cases.:
   - $s(v) = |T(v)|$ **size** of subtree of $v$
   - $r(v) = \log s(v)$ **rank** of $v$
   - $\Phi = \sum_v r(v)$ potential as sum of ranks
-- Splay(x)
-  - we claim that $A \le 3(r'(x)-r(x)) + 1$, where $r'(x)$ is rank after operation
-  - to prove this, we look at all rotations in detail
-  - real cost $R$ is $2$ for zig-zig and zig-zag, $1$ for zig
-  - $\Delta\Phi$ is only dependent on ranks of $x, p$ and $g$
-    - all vertices in sub-trees A, B, C, D don't change at all
-    - all vertices whose sub-trees contain $x,p,g$ (and in turn the whole sub-tree we're analyzing) do change in structure, but their sizes also remain the same
-  - one important fact used here is that
-    $$\log\frac{\alpha+\beta}{2} \ge \frac{\log a + \log b}{2}$$
-    that simply comes from the fact that logarithmic function is convex and therefore it holds that mean value of two function values is at most function value of their mean
-  - **ZIG-ZIG**
-    $$A = 2 + r'(x) - r(x) + r'(p) - r(p) + r'(g) - r(g)$$
-    $s'(x) = s(g) \implies r'(x) = r(g)$
-    $$A = 2 + r'(p) + r'(g) - r(x) - r(p)$$
-    now we see that  
-    $s(x) + s'(g) + 1 = s'(x)$  
-    using the logarithm inequality:  
-    $r(x) + r'(g) = \log(s(x)) + \log(s(g)) \le 2 \log \frac{s(x) + s(g)}{2} \le 2r'(x) - 2$  
-    so we get  
-    $r'(g) \le 2r'(x) - r(x) - 2$
-    $$A \le 2r'(x) - 2r(x) + r'(p) - r(p)$$
-    next we easily see that $r'(p)<r'(x)$ and $r(p)<r(x)$
-    $$A \le 3r'(x) - 3r(x)$$
-  - **ZIG-ZAG**
-    $$A = 2 + r'(x) - r(x) + r'(p) - r(p) + r'(g) - r(g)$$
-    similarly to ZIG-ZIG  
-    $s'(p) + s'(g) + 1 = s'(x)$  
-    so analogically  
-    $r'(p) + r'(g) \le 2r'(x) - 2$
-    $$A \le 3r'(x) - r(x) - r(p) - r(g)$$
-    now to achieve claim, we easily see that $r(p) > r(x)$ and $r(g) > r(x)$
-    $$A \le 3r'(x) - 3r(x)$$
-  - **ZIG**
-    $$A = 1 + r'(x) + r'(p) - r(x) - r(p)$$
-    it is easy to see that $r'(x) > r'(p)$ and $r(x) < r(p)$
-    $$A \le 2r'(x) - 2r(x) + 1 \le 3(r'(x) - r(x)) + 1$$
-    as $r'(x) \ge r(x)$
+
+### Splay(x)
+- we claim that $A \le 3(r'(x)-r(x)) + 1$, where $r'(x)$ is rank after operation
+- to prove this, we look at all rotations in detail
+- real cost $R$ is $2$ for zig-zig and zig-zag, $1$ for zig
+- $\Delta\Phi$ is only dependent on ranks of $x, p$ and $g$
+  - all vertices in sub-trees A, B, C, D don't change at all
+  - all vertices whose sub-trees contain $x,p,g$ (and in turn the whole sub-tree we're analyzing) do change in structure, but their sizes also remain the same
+- one important fact used here is that
+  $$\log\frac{\alpha+\beta}{2} \ge \frac{\log a + \log b}{2}$$
+  that simply comes from the fact that logarithmic function is convex and therefore it holds that mean value of two function values is at most function value of their mean
+- **ZIG-ZIG**
+  $$A_i = 2 + r'(x) - r(x) + r'(p) - r(p) + r'(g) - r(g)$$
+  $s'(x) = s(g) \implies r'(x) = r(g)$
+  $$A_i = 2 + r'(p) + r'(g) - r(x) - r(p)$$
+  now we see that  
+  $s(x) + s'(g) + 1 = s'(x)$  
+  using the logarithm inequality:  
+  $r(x) + r'(g) = \log(s(x)) + \log(s(g)) \le 2 \log \frac{s(x) + s(g)}{2} \le 2r'(x) - 2$  
+  so we get  
+  $r'(g) \le 2r'(x) - r(x) - 2$
+  $$A_i \le 2r'(x) - 2r(x) + r'(p) - r(p)$$
+  next we easily see that $r'(p)<r'(x)$ and $r(p)<r(x)$
+  $$A_i \le 3r'(x) - 3r(x)$$
+- **ZIG-ZAG**
+  $$A_i = 2 + r'(x) - r(x) + r'(p) - r(p) + r'(g) - r(g)$$
+  similarly to ZIG-ZIG  
+  $s'(p) + s'(g) + 1 = s'(x)$  
+  so analogically  
+  $r'(p) + r'(g) \le 2r'(x) - 2$
+  $$A_i \le 3r'(x) - r(x) - r(p) - r(g)$$
+  now to achieve claim, we easily see that $r(p) > r(x)$ and $r(g) > r(x)$
+  $$A_i \le 3r'(x) - 3r(x)$$
+- **ZIG**
+  $$A_i = 1 + r'(x) + r'(p) - r(x) - r(p)$$
+  it is easy to see that $r'(x) > r'(p)$ and $r(x) < r(p)$
+  $$A_i \le 2r'(x) - 2r(x) + 1 \le 3(r'(x) - r(x)) + 1$$
+  as $r'(x) \ge r(x)$
+  $$A \le \sum_{i=1}^t A_i \le \sum_{i=1}^t 3(r_i(x) - r_{i-1}(x)) + 1$$
+  which is a telescopic sum
+  $$A \le 3(r_t(x) - r_0(x)) + 1 \le 1 + 3\log n$$
+  we can use $1$ instead of $t$ as we know ZIG is only used once
+- so we get amortized $Splay(x) \in O(\log n)$
+- the real cost however also incorporates the potential difference, which is again a telescopic sum in
+  $$R \le A - \Delta\Phi = A - \Phi_t + \Phi_0 \le A - 0 + n \log n$$
+- finally we get that $m$ splays on $n$-node tree runs in $O((m+n)\log n)$
+
+### Find(x)
+- successful find finds the node in depth $\Theta(d)$
+- subsequent splay also takes $\Theta(d)$, but amortized $O(\log n)$
+- similarly for unsuccessful find, which only reaches leaf
+- this doesn't change the potential
+- added up, whole find op, takes amortized $2O(\log n)$
+
+### Insert(x)
+- passes down the tree
+- if finds the inserting node, it's analogic to Find(x)
+- otherwise it reaches leaf, adds inserted node as child and splays it
+- it can change the potential, which might be a problem
+  - consider path $v_1,\dots,v_{t+1}$, where $v_{t+1}$ is the added leaf
+  - only potential of nodes along the traversed path are changed
+  - $\Delta\Phi = \Phi' - \Phi = r'(v_{t+1}) + \sum_{i=1}^t (r'(v_i)-r(v_i))$
+  - we know that $s'(v_{t+1}) = 1 \implies r'(v_{t+1}) = 0$
+  - for other nodes, we know that $r'(v_i) = \log (s'(v_i) + 1) \le \log s'(v_{i-1}) = r(v_{i-1})$
+  - this inequality is sufficient to bound the potential change, as:  
+    $\Delta\Phi \le r'(v_1) - r(v_1) + \sum_{i=2}^t (r(v_{i-1}) - r(v_i))$
+  - which is a telescopic sum, obtaining:  
+    $\Delta\Phi \le r'(v_1) - r(v_t) \le \log n$
+- by bounding it we get amortized cost of insert of $O(\log n)$
+
+### Delete(x)
+- pass down the tree
+- if it's leaf, remove
+- if it has one child, replace it
+- if it has two children, find and replace by e.g. its successor
+- potential changes, but is decreased, so it doesn't pose a problem for cost
+- apart from that, deleting takes constant time, so does replacing, and other than that it's just search which works in amortized $O(\log n)$
+
+### Static optimality
+- consider accessing nodes $x_1,\dots,x_k$, $t_1,\dots,t_k$ times in total respectively during some sequence of operations
+- the sequence will then take $O(n\log n + \sum t_i\log\frac{n}{t_i}) = O(n\log n + mH(X))$
+  - where $X = (\frac{t_1}{m},\dots,\frac{t_k}{m})^T$ distribution, and $H(X)$ is its entropy
+- this states that a splay tree containing these keys performs in $O$ of expected time of any arbitrary (including an optimal) static tree.
+- in other words, with the difference of a multiplication constant, splay tree is able to perform as well as any other static tree on the same elements
+
+### Working set bound
+- again consider accessing nodes $x_1,\dots,x_k$ in sequence $s_1,\dots,s_m$
+- let us denote $z_1,\dots,z_m$ signifying number of different elements accessed between this ($s_i$) and previous ($s_{i-z_i}$) access of currently accessed element
+- this sequence will take $O(n\log n + m + \sum_{i=1}^m \log(1+z_i))$
+- this takes advantage of the fact that frequently accessed elements are kept closer to the root
+- the more different elements are accessed, the "deeper" is the element pushed down
 
 ## (a,b)-trees
 
+- tree where each internal node contains between $a$ and $b$ children
+- root contains between $2$ and $b$ children
+- all leafs are on the same level
+- only leaves contain inserted keys
+- internal nodes contain only boundaries and can be redundant
+- $(a,b)$-tree of depth $d$ has at $a^{d-1} \le l \le b^d$ leafs
+  - <doubt>shouldn't it be $a^d$</doubt>
+- $(a,b)$-tree with $l$ leaves has $\log_b n \le d \le 1 + \log_a n$
+- each internal node remembers maximas of all its subtrees 
 - $O(n)$ splits during $n$ inserts into an empty tree
 - if $b \ge 2a$, then the number of splits/merges during $m$ inserts and $l$ deletes is $O(m+l)$
 - let's define
   - $\Phi = 2 \cdot \#a + 1 \cdot \#(a+1) + 2 \cdot \#(b-1) + 4 \cdot \#b$,  
     where $\#a =$ number of vertices which have $a$ descendants
 
-### Insert
+### Find(x)
+- simply go down the tree. At each node, use bounds to determine which child to pick next
+- bounds in node can be in sorted array - use binary search
+- time $\le \log_b n \cdot O(\log b) = O(\log n)$
+  - time = find appropriate bounds * path down the tree
+  - $\log b < \log n$ in most cases
+
+### Insert(x)
+
+- find node above leafs where to insert
+- if it has $<b$ children, insert
+  - time as in Find $O(\log n)$
+- if it has $=b$ children, split
+  - create $2$ new nodes of sizes $\lfloor\frac{b-1}{2}\rfloor$ and $\lfloor\frac{b+1}{2}\rfloor$
+  - recursively insert these new nodes instead of the old one in the parent
 
 ![](res/ab_insert.png)
 
 - consider an arbitrary insert which triggers splitting
-- w.l.o.g. split propagates through $t$ vertices
+- split propagates through $t$ vertices
   - each of them has to contain $b$ children in order to be split
   - by definition, by splitting them we obtain $2$ new vertices for each of them, of sizes $\ge a$ and $a+1$ respectively
   - additionally, the first node along the path **not** to split was of size $<b$, but after increased by $1$, therefore can be of size $\le b$
@@ -208,30 +296,44 @@ We again have 2 cases.:
   - $\Delta\Phi \le - 4t + 2t + 1t + 4 = 4 - t$
   - $R = 1 + t$ (insert + splits)
   - $A \le 5$
+  - amortized time as in Find $O(\log n)$ + constant
 
-### Delete
+### Delete(x)
+
+- find node which contains $x$
+- if it has $>a$ children, remove
+  - time as in Find $O(\log n)$ + constant
+- if it has $=a$ children
+  - if some one of its direct neighbors has $>a$ children, "borrow$ one
+    - either left-most of right neighbor or right-most of left neighbor
+    - fix bounds in parent accordingly
+    - time as in Find $O(\log n)$ + constant
+  - if all have $=a$ children, delete merge with neighbor
+    - take their $2a-1$ remaining leafs, and create new node
+    - recursively delete node in parent
 
 ![](res/ab_delete.png)
 
 - consider an arbitrary delete which triggers merging
-- w.l.o.g. merging propagates through $s$ levels
-  - each level contains $2$ neighboring nodes of size $a$
-
-- máme $s$ dvojíc vrcholov s $a$ synmi, kt. sa spoja do $s$ vrcholov s $2a-1$ synmi
-- teda:
-  - zanikne **určite** $2s$ vrcholov v $\#a$
-    - $-2 \cdot 2s$
-  - vznikne **najviac** $s$ vrcholov v $\#(b-1)$ (z $2a-1$)
-    - $+2s$
-  - vznikne **možno** $1$ vrchol v $\#b$ ($p'$ z $p$)
-    - $+4$
-  - vznikne **možno** $1$ vrchol v $\#b$ ($q'$ z $q$)
-    - $+4$
-- $\Delta\Phi \le -2 \cdot 2s + 2s + 4 + 4 = 8 - 2s$
-- $R = 1 + 2s$ (insert + merge)
-- $A \le 9$
+- merging propagates through $s$ levels
+  - each level contains $2$ neighboring nodes of size $a$ (as merging was done instead of borrowing from neighbors)
+  - on top, vertices $x$ and $y$ have necessarily more children ($x + y \ge 2a + 1$), as they didn't continue with the merge
+  - after the merging, we obtain $s$ vertices of size $2a-1$, and finally increasing overall size of $p' + q'$ by $1$
+- again consider $\Delta\Phi$
+  - $2s$ nodes in $\#a$ were lost exactly
+  - $s$ nodes in $\#(b-1)$ were added $(2a-1<b)$
+    - <doubt>$2a-1 \le b$ mentioned in lecture though</doubt>
+  - $2$ nodes in $\#b$ were added at most ($p'$ and $q'$)
+- $\Delta\Phi \le -2 \cdot 2s + 2s + 2\cdot4 = 8 - 2s$
+- $R = 1 + s$ (insert + merge)
+- $A \le 9 - s \le 9$
+  - as $s \in \mathbb{N}$
+- amortized time as in Find $O(\log n)$ + constant
 
 # Caching
+
+- when measuring external memory performance, we compute complexity with regards to number of **read blocks** from external memory into cache
+- for the sake of simplicity, we ignore most of the architecture and only look at interaction between (CPU - cache - outside world)
 
 ![](res/cache.png)
 
@@ -254,7 +356,7 @@ We again have 2 cases.:
 ## Mergesort
 
 Time complexity:
-- we pass each $\lceil \log N \rceil$ times (sort sets of 2, 4, 8...)
+- we pass altogether $\lceil \log N \rceil$ times (sort sets of 2, 4, 8...)
 - each pass takes $\Theta(N)$ time
 - reaching overall complexity of $\Theta(N \log N)$
 
@@ -286,22 +388,30 @@ I/O complexity:
 
 ## Matrix transposition
 
-- usually stored in row-major mode
+- usually stored in row-major mode (saved row by row sequentially)
 - read by rows then takes $O(N^2/B+1)$ reads
+  - $+1$ in case $N^2<B$
 - read by cols can reach $\Theta(N^2)$
-- transposing by triangles is no good then, as we access the other by columns
+  - e.g., when $N>B$, next item in column won't fit in the same block
+- transposing by triangles is no good then, as we access the other triangle by columns, still $O(N^2)$ if $\frac{M}{B}<N$  
+  ![](res/matrix_trans_triangles.png)
 
 ### Tiling algorithm
 
+- divide and conquer strategy
+- works for both CA and CO with some modification
+- main idea is to split matrix into sub-matrices of small enough size to fit in cache (along with their counterparts)
+
+#### Cache-aware
 - split matrix to $d \times d$ tiles, possibly rectangular
 - we get $\lceil N/d \rceil^2 \le (N/d + 1)^2 \in O(N^2/d^2 + 1)$ tiles
-- if $B | N$, we can align matrix to block, so every row starts with new block
+- if $N$ divisible by $B$, we can align matrix to block, so every row starts with new block
 - if we set $d = B$, each row of block is contained in a block too, meaning we could process tile in $O(B)$ I/O ops for large enough cache
 - for $N^2/B^2$ blocks that means $O(N^2/B)$ reads
 
 Requirements:
 - we need to work with 2 tiles at once, so $M \ge 2B^2$, referred to as **tall-cache property**
-- more generally tall cache has $M \in \Omega(B^2)$
+- more generally tall cache has size $M \in \Omega(B^2)$
 - for any constant in $\Omega$ we can simply split the tile to a small enough subtiles and algo won't change asymptotically.
 
 Non-aligned:
@@ -315,9 +425,9 @@ Non-aligned:
 
 - using **divide and conquer** strategy
 - recursively split matrix into 4 submatrices, transpose individually
-- altogether $n^2$ operations
+- altogether $n^2 - n$ operations
 - altogether $O(n^2/B)$ I/O ops
-- assumes **tall-cache property**
+  - assumes **tall-cache property**, so $M>B^2$
 
 #### Proof
 
@@ -332,26 +442,26 @@ Non-aligned:
 - saved row-wise like a normal heap
 - traversing path takes $\log \frac{N}{B}$ I/O transfers
 
-## Van Emde Boas tree
+## Van Emde Boas layout
 
 ![](res/veb_tree.png)
 
-- each tree recursively branching into $\sqrt{n}$ subtrees of size $\sqrt{n}$
-- each subtree is saved in continuously in memory
-- tree of size $\le B$ saved in $O(1)$ continuous blocks
+- "cache-oblivious B-tree"
+- not to be confused with vEB trees, upon which it is only based
+- details [here (page 3)](https://cs.au.dk/~gerth/papers/cacheoblivious05.pdf)
+- a tree is subdivided recursively into $\Theta(\sqrt{n})$ subtrees of size $\Theta(\sqrt{n})$
+- these are saved continuously in memory
+- at some point in the subdivision, size gets small enough that $n \le B$
+- at that point, we can read the whole subtree in $O(1)$ I/O operations
+
 
 ### Traversing
 
-![](res/veb_tree_traverse.png)
-
-- path goes through $\le \log N / \log \sqrt{B}$ subtrees
-- altogether $O(\frac{\log N}{\log B})$ I/O transfers
-
-### Sorting
-
-- Mergesort takes $O(\frac{n}{B} \log n)$ I/O transfers
-- K-way mergesort takes $O(\frac{n}{B} \log_K n)$ I/O transfers
-- Funnelsort takes $O(\frac{n}{B} \log_{M/B} n)$ I/O transfers
+- for small enough subdivision we get subtree of size $\sqrt{B} \le n \le B$
+- such subtree has height $h \ge \log \sqrt{B}$
+- an arbitrary path from root to leaf goes through $\le \log N / \log \sqrt{B}$ such subtrees
+- altogether we get I/O complexity
+  $$O\left(\frac{\log N}{\log \sqrt{B}}\right) = O\left(\frac{\log N}{\frac{1}{2}\log B}\right) = O(\log_B N)$$ 
 
 # Cache management
 
