@@ -1,3 +1,5 @@
 {
-    "markdown.preview.typographer": true
+    "markdown.preview.typographer": true,
+    "markdown.preview.scrollEditorWithPreview": false,
+    "markdown.preview.scrollPreviewWithEditor": false
 }
