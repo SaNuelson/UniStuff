@@ -7,6 +7,92 @@
   }
 </style>
 
+# Table of Contents
+- Lazy evaluated tree
+  - $\Phi = C\sum_v r(v)$
+    - $r(v) = |s(l(v)) - s(r(v))|$ if $\ge2$ else $0$
+  - Find - $O(\log n)$
+  - Insert - $O(\log n)$
+- Splay tree
+  - ZIG, ZIG-ZIG, ZIG-ZAG
+  - $\Phi = \sum_v r(v)$
+    - $r(v) = \log s(v)$
+  - $A \le 3(r'(x) - r(x)) + 1$
+  - m times Splay - $O((m+n)\log n)$
+    - $m\log n$ run time
+    - $n\log n$ potential fall
+  - Find - $O(\log n)$
+  - Insert - $O(\log n)$
+  - Delete - $O(\log n)$
+  - Static opt. - $O(n \log n + m H(X))$
+  - Working set bound - $O(n \log n + m + \sum \log(1 + z_i)$
+- (a,b)-tree
+  - $\Phi = 2\cdot\#a+1\cdot\#(a+1)+2\cdot\#(b-1)+4\cdot\#b$
+  - Find - $O(\log n)$
+  - Insert - $O(\log n)$
+  - Delete - $O(\log n)$
+- Cache
+  - Seq. read
+    - $O(\frac{N}{B}+1)$
+  - Matrix transposition
+    - if tall-cache prop. ($M\in\Omega(B^2)$)
+    - $O(N^2/B)$
+  - Tree in memory
+    - $O(\log\frac{N}{B})$
+  - van Emde Boas layout
+    - recursively subdivided to $\Theta(\sqrt{n})$ size
+    - $O(\log_B N)$
+  - Mergesort
+    - $O(\frac{n}{B}\log n + 1)$
+  - K-way mergesort
+    - $O(\frac{n}{B}\log_K n + 1)$
+- Cache management
+  - $C_{LRU} \le \frac{M_{LRU}}{M_{LRU}-M_{OPT}}\cdot C_{OPT} + M_{LRU}$
+- Hashing
+  - Balls & Bins
+    - $P[b_i=0]=\left(1-\frac{1}{n}\right)^n$
+    - $P[b_i=k]={n\choose k}\left(\frac{1}{n}\right)^k\left(1-\frac{1}{n}\right)^{n-k}$
+    - $P[\exists i:b_i=k]\le \frac{1}{n^2}$
+      - when $k=\left(\frac{\log n}{\log \log n+}\right)$
+  - Linear probing
+    - $EX \in O\left(\left(\frac{e}{3}\right)^k\right)$
+  - Balls & Bins with choice
+    - expected fullness $O(\log \log n)$
+  - Cuckoo hashing
+    - Find - $O(1)$
+    - Delete - $O(1)$
+    - Insert - $O(1)$
+    - best $m \ge 2n$
+    - rehash after $6\log n$ inserts
+  - C-universality
+    - $P_{h\in H}[h(x)=h(y)]\le \frac{c}{m}$
+  - K,C-independent
+    - $P_{h\in H}[h(x_1) = a_1 \wedge \dots \wedge h(x_k) = a_k] \le \frac{c}{m^k}$
+  - Perfect hashing
+    - $m\ge kn^2, k \ge 1 \implies P[\textrm{hashes S perfectly}]\ge 1-\frac{1}{k}$
+  - Tabulation hashing
+  - 2-independent hashing systems
+    - mod m
+      - $H=\{h_{a,b}:U\rightarrow\{0,\dots,p-1\};a,b\in\{0,\dots,p-1\}\}$
+      - $h_{a,b}(x) = ax+b \mod p$
+    - mod p mod m
+      - $H=\{h_{a,b}:U\rightarrow\{0,\dots,m-1\};a,b\in\{0,\dots,p-1\}\}$
+      - $h_{a,b}(x) = ax+b \mod p \mod m$
+    - Using matrix
+      - $H=\{h_{A,b}:\{0,1\}^w\rightarrow\{0,1\}^k;A\in\{0,1\}^{k\times w}, b \in \{0,1\}^k\}$
+      - $h_{A,b}(x) = Ax + b$
+      - over Galois field
+    - Multiply shift
+      - $H_{a,b}=\{h_{a,b}:\{0,1\}^w\rightarrow \{0,1\}^k;a,b\in\{0,1\}^{w+k-1}\}$
+      - $h_{a,b} = [(ax+b)\gg(w-1)]_{1\dots k}$
+    - Vectors
+      - $H=\{h_{a_1,\dots,a_d,b}:a_1,\dots,a_d,b\in\{0,1\}^{w'}\}$
+        - $w' \ge w + k - 1$
+      - $h_{a_1,\dots,a_d,b}(x_1,\dots,x_d)=[\sum a_i x^i + b]_{w'-k+1\dots w'}$
+    - String hashing
+      - $H=\{h_a:a\in\{0,\dots,p-1\}\}$
+      - $h_a(x_0,\dots,x_{d-1})=\sum x_i a^i$
+
 # Preliminaries
 
 - **data structure** - black box containing some **data** and providing certain **operations** on top of it
@@ -122,14 +208,14 @@ We again have 2 cases.:
     - then, by rebuilding the subtree we lower the potential by $>s(v)$
   - altogether we get
     $$
-      A_i = \left\{
+      A = \left\{
       \begin{array}{cl}
         O(\log n) + O(\log n) & \textrm{non-balancing step} \\
         O(s(x) + \log n) - C\frac{s(x)}{3} & \textrm{balancing step}
       \end{array} \right.
     $$
     therefore
-    $$A_i = O(\log n)$$
+    $$A = O(\log n)$$
 
 ## Splay trees
 
@@ -277,15 +363,20 @@ We again have 2 cases.:
 - if it has $<b$ children, insert
   - time as in Find $O(\log n)$
 - if it has $=b$ children, split
-  - create $2$ new nodes of sizes $\lfloor\frac{b-1}{2}\rfloor$ and $\lfloor\frac{b+1}{2}\rfloor$
+  - create $2$ new nodes of sizes $\lfloor\frac{b-1}{2}\rfloor$ and $\lceil\frac{b+1}{2}\rceil$
   - recursively insert these new nodes instead of the old one in the parent
 
 ![](res/ab_insert.png)
 
+- assume $b \ge 2a$
 - consider an arbitrary insert which triggers splitting
 - split propagates through $t$ vertices
   - each of them has to contain $b$ children in order to be split
-  - by definition, by splitting them we obtain $2$ new vertices for each of them, of sizes $\ge a$ and $a+1$ respectively
+  - by definition, by splitting them we obtain $2$ new vertices for each of them, of sizes $\lfloor\frac{b-1}{2}\rfloor$ and $\lceil\frac{b+1}{2}\rceil$ respectively
+    - as we know $b \ge 2a$, we get
+      - $\lceil\frac{b+1}{2}\rceil\ge\lceil a+\frac{1}{2}\rceil=a+1$
+    - for other one simply
+      - $\lfloor\frac{b-1}{2}\rfloor<b$
   - additionally, the first node along the path **not** to split was of size $<b$, but after increased by $1$, therefore can be of size $\le b$
 - now we consider the upper bound of $\Delta\Phi$ (as we're trying to find the upper bound of amortized complexity)
   - $t$ nodes in $\#b$ are lost exactly
@@ -360,11 +451,11 @@ Time complexity:
 - each pass takes $\Theta(N)$ time
 - reaching overall complexity of $\Theta(N \log N)$
 
-I/O complexity:
+Read complexity:
 - a single pass requires $O(T/B + 1)$ reads, where 
   - $T$ is number of items
   - $B$ is number of items per block
-- since we need $\log N$ passes, we reach I/O complexity of $O(T/B\cdot \log N + \log N)$
+- since we need $\log N$ passes, we reach read complexity of $O(T/B\cdot \log N + \log N)$
 - and since "$+1$" is only significant when $N < B$, we can fit it in cache in one go and don't need the $\log$ passes, so we get $O(T/B\cdot \log N + 1)$
 
 ## Multi-way Mergesort
@@ -375,16 +466,16 @@ Time complexity:
 - that takes $\Theta(T \log K)$ for $T$ items
 - making Mergesort run in $\Theta(N \log K \cdot \log N / \log K) = \Theta(N \log N)$ for any $K$
 
-I/O complexity:
-- if cache is large enough, I/O complexity is $O(T/B + K)$. $K$ is for when all runs are in separate blocks. It can be run in continuous memory getting $O(T/B + 1)$.
-- with $\log_K N$ passes we get total I/O complexity $O(N/B\cdot \log N / \log K + 1)$
+read complexity:
+- if cache is large enough, read complexity is $O(T/B + K)$. $K$ is for when all runs are in separate blocks. It can be run in continuous memory getting $O(T/B + 1)$.
+- with $\log_K N$ passes we get total read complexity $O(N/B\cdot \log N / \log K + 1)$
 
 - how high can $K$ go?
 - Need $K+1$ blocks for scan (+ result block)
 - $K-1$ blocks are enough for the heap
 - so we need $M \ge 2BK$
 - if we know $M$ and $B$ in advance, we set $K = \frac{M}{2B}$ for best efficiency
-- that way we get I/O complexity $O(N/B\cdot \log N / \log \frac{M}{B} + 1) =$
+- that way we get read complexity $O(N/B\cdot \log N / \log \frac{M}{B} + 1) =$
 
 ## Matrix transposition
 
@@ -406,7 +497,7 @@ I/O complexity:
 - split matrix to $d \times d$ tiles, possibly rectangular
 - we get $\lceil N/d \rceil^2 \le (N/d + 1)^2 \in O(N^2/d^2 + 1)$ tiles
 - if $N$ divisible by $B$, we can align matrix to block, so every row starts with new block
-- if we set $d = B$, each row of block is contained in a block too, meaning we could process tile in $O(B)$ I/O ops for large enough cache
+- if we set $d = B$, each row of block is contained in a block too, meaning we could process tile in $O(B)$ read ops for large enough cache
 - for $N^2/B^2$ blocks that means $O(N^2/B)$ reads
 
 Requirements:
@@ -416,7 +507,7 @@ Requirements:
 
 Non-aligned:
 - if $B \nmid N$, we lose alignment but it's still fine
-- if e.g. $B \times B$ block's row spans 2 blocks, that's $2B$ I/O ops, still $\in O(B)$
+- if e.g. $B \times B$ block's row spans 2 blocks, that's $2B$ read ops, still $\in O(B)$
 - cache has to contain $4B^2$ items this way
 
 ### Cache-oblivious
@@ -426,7 +517,7 @@ Non-aligned:
 - using **divide and conquer** strategy
 - recursively split matrix into 4 submatrices, transpose individually
 - altogether $n^2 - n$ operations
-- altogether $O(n^2/B)$ I/O ops
+- altogether $O(n^2/B)$ read ops
   - assumes **tall-cache property**, so $M>B^2$
 
 #### Proof
@@ -434,13 +525,13 @@ Non-aligned:
 ![](res/matrix_trans_co_proof.png)
 - at some point we reach submatrices which can fit into $B$ blocks
 - there is $\frac{N}{B/2} \times \frac{N}{B/2} = 4 \frac{N^2}{B^2}$ such submatrices
-- resulting in $4\frac{N^2}{B^2} \cdot B = 4\frac{N^2}{B}$ I/O ops
+- resulting in $4\frac{N^2}{B^2} \cdot B = 4\frac{N^2}{B}$ read ops
 
 ## Saving tree in memory
 
 ![](res/matrix_trans_co_tree.png)
 - saved row-wise like a normal heap
-- traversing path takes $\log \frac{N}{B}$ I/O transfers
+- traversing path takes $\log \frac{N}{B}$ read transfers
 
 ## Van Emde Boas layout
 
@@ -452,7 +543,7 @@ Non-aligned:
 - a tree is subdivided recursively into $\Theta(\sqrt{n})$ subtrees of size $\Theta(\sqrt{n})$
 - these are saved continuously in memory
 - at some point in the subdivision, size gets small enough that $n \le B$
-- at that point, we can read the whole subtree in $O(1)$ I/O operations
+- at that point, we can read the whole subtree in $O(1)$ read operations
 
 
 ### Traversing
@@ -460,8 +551,8 @@ Non-aligned:
 - for small enough subdivision we get subtree of size $\sqrt{B} \le n \le B$
 - such subtree has height $h \ge \log \sqrt{B}$
 - an arbitrary path from root to leaf goes through $\le \log N / \log \sqrt{B}$ such subtrees
-- altogether we get I/O complexity
-  $$O\left(\frac{\log N}{\log \sqrt{B}}\right) = O\left(\frac{\log N}{\frac{1}{2}\log B}\right) = O(\log_B N)$$ 
+- altogether we get read complexity
+  $$O\left(\frac{\log N} {\log \sqrt{B}}\right) = O\left(\frac{\log N}{\frac{1}{2}\log B}\right) = O(\log_B N)$$ 
 
 # Cache management
 
@@ -565,7 +656,7 @@ $$
 $$
   - if $k \ll n$
 $$
-    Pr[b_i=k] \approx \frac{n^k}{n!}(\cdot\frac{1}{n})^k\cdot\frac{1}{e}=\frac{1}{ek!}
+    Pr[b_i=k] \approx \frac{n^k}{n!}\cdot\left(\frac{1}{n}\right)^k\cdot\frac{1}{e}=\frac{1}{ek!}
 $$
 
 ---
@@ -578,20 +669,30 @@ $$
 - because:
   - $k! \le k^k$
 $$
-    Pr[\exists i: b_i=k] \le n \cdot Pr[b_i=k] \le \frac{n}{ek!} \le \frac{n}{ek^k}
+    Pr[\exists i: b_i=k] \ge n \cdot Pr[b_i=k] \ge \frac{n}{ek!} \ge \frac{n}{ek^k}
 $$
 and as
 $$
     k^k = \left(\frac{\log n}{\log\log n}\right)^{\left(\frac{\log n}{\log\log n}\right)}
 $$
 $$
-        = 2^{\log\left(\frac{\log n}{\log\log n}\right)\cdot\left(\frac{\log n}{\log\log n}\right)}
+    = 2^{\left(\frac{\log n}{\log\log n}\right)\log\left(\frac{\log n}{\log\log n}\right)}
 $$
 $$
-        \approx 2^{c \log n}
+    = 2^{\left(\frac{\log n}{\log\log n}\right)(\log\log n - \log\log\log n)}
 $$
 $$
-        = n^c
+    =2^{\log n - \frac{\log \log \log n \log n}{\log \log n}}
+$$
+$$
+    \approx 2^{\log n}
+$$
+$$
+    = n
+$$
+so
+$$
+    k \in O\left(\frac{\log n}{\log\log n}\right) \implies k^k \in O(n)
 $$
 we get
 $$
@@ -709,15 +810,141 @@ $$
   \le O\left(\frac{1}{\log^4 n}\right)
 $$
 
+
+## c-universality
+- let $H$ be family of hash functions $U \rightarrow [m]$. Then we call it **c-universal** iff for any $x \neq y \in U$:
+  $$P_{h\in H}[h(x) = h(y)] \le \frac{c}{m}$$
+- in other words, they're c-universal if the chance of collision of any two keys is at most c-times higher than for some completely random function $h$
+
+## (k,c)-independence
+- let $H$ be family of hash functions $U \rightarrow [m]$. Then we call it **(k,c)-independent** iff for any $x_1\neq\dots\neq x_k \in U$ and $a_1,\dots,a_k \in [m]$:
+  $$P_{h\in H}[h(x_1) = a_1 \wedge \dots \wedge h(x_k) = a_k] \le \frac{c}{m^k}$$
+
+## Perfect hashing
+
+- let's have $H$ family of **universal** hashing functions $U\rightarrow [m]$
+- let's have fixed $S \subseteq U, |S| = n$
+- then we say that a hash function **hashes S perfectly** iff
+  $$\forall x \ne y \in S \times S: h(x)\ne h(y)$$
+- if $m \ge kn^2$, for $k \ge 1$ then we get:
+  $$P[\textrm{"h hashes S perfectly"}] \ge 1-\frac{1}{k}$$
+- because
+  $$
+  \begin{array}{ll}
+    P[\exists x \ne y \in S, h(x) = h(y)] 
+      & \le \sum_{(x,y)\in S^2}P[h(x)=h(y)] \\\\
+      & \le n^2 \cdot \frac{1}{m} \\\\
+      & \le n^2 \cdot \frac{1}{kn^2} \\\\
+      & = \frac{1}{k}
+  \end{array}
+  $$
+- perfect hashing function can be used as a middle-step
+  - because if it is perfect of $S$, it is an incective function $S \rightarrow [kn^2]$, and therefore the whole hashing system retains attributes of its secondary hashing function
+  - more generally, by picking $k \gg n$, we get probability of collision $\frac{1}{k}$, which is negligible
+
+## Tabulation hashing
+- main idea is splitting keys into parts of fixed lengths, then using them as indexes in randomly generated lookup tables, finally xoring those values to get hashed value
+- in other words:
+  - $h_T: U \rightarrow [m]$
+  - $|U| = n$
+  - each key $x \in U$ split into $d$ parts
+    - these parts will have $\frac{\log n}{d}$ bits
+  - create **lookup tables** $T_1,\dots,T_d$
+    - each contains $2^{\textrm{"bits per split"}} = 2^\frac{\log n}{d} = \frac{n}{2^d}$ values
+    - all values have $\lceil \log m \rceil$ bits
+- Example: $U=\{0,1\}^{32}, d=4, m=2^{16}$
+  - $h(x_1,x_2,x_3,x_4) = T_1[x_1] \oplus T_2[x_2] \oplus T_3[x_3] \oplus T_4[x_4]$
+  - we need $d=4$ lookup tables
+  - each with $\frac{n}{2^d}=2^8$ values
+  - each value of $\log m = 16$ bits
+  - altogether $4 \cdot 2^8 \cdot 16b = 2^{14}b = 2^{11}B \approx 2KB$
+
+## 2-independent hashing systems
+
+### $(ax + b) \mod p$
+
+- select $p$ prime
+- $H = \{h_{a,b}\}$ such that
+  - $h_{a,b}: U \rightarrow \{0,\dots,p-1\}$
+  - $h_{a,b}(x) = (ax + b) \mod p$
+  - $a,b \in \{0,\dots,p-1\}$
+- selecting random $h_{a,b}$ means selecting random $a,b$
+- proof of independence:
+  - $P_{h\in H}[x \ne y|ax+b=r \wedge ay+b=s] \le \frac{1}{p^2}$
+    - because
+      $$
+        \begin{array}{l}
+          ax + b = r\\
+          ay + b = s
+        \end{array}
+      $$
+    - put into words
+      - probability of two non-identical values colliding is bounded
+      - because the set of linear equations above is regular and has unique solutions for $a$ and $b$
+        - thanks to working in field $\mathbb{Z}_p$ with $p$ prime
+        - and knowing that $x \ne y$
+      - so we get $1/p$ chance of selecting such $a$, same for $b$
+- disadvantage:
+  - need to compute $\mod p$ (slow)
+
+### $((ax + b) \mod p) \mod m$
+
+- $p$ prime
+- $m < p$ (otherwise its previous case)
+- $H = \{h_{a,b}\}$
+  - $h_{a,b}:U\rightarrow\{0,\dots,m-1\}$
+  - $h_{a,b}(x) = ((ax + b) \mod p) \mod m$
+  - $a,b \in \{0,\dots,p-1\}$
+- proof of independence:
+  - $P_{h\in H}[x \ne y|ax+b=r \wedge ay+b=s] \le \frac{4}{m^2}$
+    - because
+      $$
+        \begin{array}{ll}
+          P_{h\in H}[h_{a,b}(x) = r] 
+          &= \lceil\frac{p}{m}\rceil \frac{1}{p} \\\\
+          &\le (\frac{p}{m}+1) \frac{1}{p} \\\\
+          &= \frac{1}{m} + \frac{1}{p} \\\\
+          &\le \frac{2}{m}
+        \end{array}
+      $$
+    - and $P[a\wedge b] \le P[a] \cdot P[b]$
+- disadvantage:
+  - need to compute $\mod p$ (slow)
+
+### Using matrix
+
+- $H = \{h_{A,b}\}$
+  - $h_{A,b}: \{0,1\}^w \rightarrow \{0,1\}^k$
+  - $h_{A,b}(x) = Ax + b$
+    - over finite field GF(2)
+  - $A \in \{0,1\}^{w \times k}$
+  - $b \in \{0,1\}^k$
+
+### Multiply-shift
+
+![](res/multiply_shift.png)
+
+- $H = \{h_{a,b}\}$
+  - $h_{a,b}:\{0,1\}^w\rightarrow\{0,1\}^k$
+  - $h_{a,b}(x) = [(ax+b)\gg(w-1)]_{1\dots k} = [ax+b]_{w\dots w+k-1}$
+    - indexing from right, so starting with $(w+k-1)$-th bit from the end, ending with $w$-th bit from the end
+- advantages:
+  - easy computation, one multiply, one addition, one AND
+
+### Vectors
+
+- $H = \{h_{a_1,\dots,a_d,b}\}$
+  - $h_{a_1,\dots,a_d,b}:\{0,1\}^{dw}\rightarrow\{\}$
+
 # Working with strings
 
 - working with strings
 - $T \in \Sigma^m$ ... text
 - $P \in \Sigma^n$ ... searched word
-- Task: 
+- Task:
   - find all occurences of $P$ in $T$
 - Naive solution: 
-  - Aho-Corsick
+  - Aho-Corasick
     - construct FSA from $P$ in time $O(n+m)$
 - Issue:
   - Usually $T$ is fixed and big
@@ -777,6 +1004,34 @@ $$
 - dokopy $O(m \log^2 m)$
 - to možno vylepšiť pomocou [Karp Miller Rosenberg](https://dl.acm.org/doi/10.1145/800152.804905) bucket sortom
   - tým znížime čas sortovania na $O(m)$, teda celkovo na $O(m \log m)$
+
+- $LCP$ je funkcia, ktorá hovorí, aký dlhý má prefix spoločné lexikograficky $i$-te slovo s nasledovníkom.
+- tým, že si LCP "posúva" počas for loopu, nikdy neprejde písmeno viackrát
+- možno skonštruovať v lineárnom čase (Kasai)
+> Example:
+> $T = cancan$  
+> suffixes: cancan, ancan, ncan, can, an, n, $\lambda$  
+> lexicographically: $\lambda$, an, ancan, can, cancan, n, ncan  
+> 1. cancan
+> - next in lex.ord.: n
+> - LCP = max(last LCP - 1, 0) + new chars = 0 + 1 = 1
+> 2. ancan
+> - next in lex.ord: can
+> - LCP = max(last LCP - 1, 0) + new chars = 0 + 0 = 0
+> 3. ncan
+> - next in lex.ord.: -
+> 4. can
+> - next in lex.ord.: cancan
+> - LCP = max(last LCP - 1, 0) + new chars = 0 + 3 = 3
+> 5. an
+> - next in lex.ord.: ancan
+> - LCP = max(last LCP - 1, 0) + new chars = 2 + 0 = 2
+> 6. n
+> - next in lex.ord.: ncan
+> - LCP = max(last LCP - 1, 0) + new chars = 1 + 0 = 1
+> 7. $\lambda$
+> - next in lex.ord.: an
+> - LCP = 0
 
 # Parallelism
 
