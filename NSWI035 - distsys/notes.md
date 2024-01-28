@@ -179,9 +179,12 @@ definice a funkce, hw architektury
 - directory-based cache coherence
 - distribuovaná pamäť je použitá ako veľká sekundárna cache, tzv. Attraction memory
 
----
+----------------------------------------------------------------
 
 # Interprocess communication
+
+- **Exactly once / at least once / at most once**
+  - [goodread](https://bravenewgeek.com/you-cannot-have-exactly-once-delivery/)
 
 ## klient/server model
 
@@ -223,7 +226,7 @@ definice a funkce, hw architektury
 
 ## Skupinová komunikácia
 
-
+----------------------------------------------------------------
 
 # Synchronization algorithms
 
@@ -483,9 +486,14 @@ definice a funkce, hw architektury
 - "virtuálna" preto, lebo v praxi funguje asynchrónne, no teoreticky funguje synchrónne
 - 
 
+----------------------------------------------------------------
+
 # Distributed consensus
 
-## Ukončenie distribuovaného systému
+## Detekcia globálneho stavu
+- prečo?
+  - analýza stabilných vlastností (i.e., ukončenie systému, uviaznutie výpočtu)
+  - 
 - **Dijkstra-Sholten algoritmus**
   - pre **strom**
     - každý list pri prechodu do **pasívneho** stavu pošle signál rodičovi
@@ -506,19 +514,82 @@ definice a funkce, hw architektury
       - ak node dostane message a nie je to prvýkrát, hneď odošle signál späť
       - ak node dostane signál od každého outgoing edge, správa sa ako list
 - **Huangov algoritmus**
-  - 
- 
-detekce globálního stavu, dosažení distribuované shody, replikovaný stavový automat, Paxos, RAFT
+  - iniciátor má váhu 1
+  - keď proces pošle správu, 1/2 svojej váhy predá správe
+  - keď proces prijme správu, preberie jej váhu
+  - keď proces skončí, pošle signál, kt. dá celú svoju váhu
+  - systém končí, keď iniciátor má znova váhu 1
+- **Značkový (TM) algoritmus**
+- 
+
+## Konzistentný stav
+- **Rez** je rozdelenie udalostí na disjunktné past a future
+- **Konzistentný rez** je rez, kde sedí kauzalita (ak a predchádza b a b je v past, aj a je v past)
+- **Stav** distribuovaného výpočtu je množina udalostí počas výpočtu
+- **Konzistentný stav** je past konzistentného  rezu 
+- KS S' je **dosiahnuteľný** z S, ak existuje udalosť e, že:
+  - $S \Rightarrow_e S'$ iff $\exists e: S' = S \cup \{e\}$
+- **Rozvrh** $s = (e_1, \dots, e_n)$ je taký, že platí:
+  - $S \Rightarrow_{e_1} S_1 \Rightarrow_{e_2} \dots S_{n-1} \Rightarrow_{e_n} S_n$
+  - platí $S \subseteq S_n$
+- 
+
+## Dosiahnutie distribuovanej zhody
+
+## Replikovaný stavový automat
+
+## Paxos
+
+## RAFT
+
+----------------------------------------------------------------
 
 # Distributed shared memory 
-konzistenční modely, distribuované stránkování
+
+## Konzistenčné modely
+
+## Distribuované stránkovanie
 
 # Asset and process management
-zablokování a distribuované algoritmy detekce, vzdálené spouštění procesů, migrace, vyvažování zátěže
+
+## Zablokovanie a distribuované algoritmy detekce
+
+## Vzdialené spustenie procesov
+
+## Migrácia
+
+## Vyvažovanie záťaže
+
+----------------------------------------------------------------
 
 # Replication 
-mechanismy replikace, klientocentrické konzistenční modely, epidemické protokoly
+
+## Mechanizmy replikácie
+
+## Klientocentrické konzistenčné modely
+
+## Epidemické protokoly
+
+----------------------------------------------------------------
 
 # Technical principles of cryptocurrency
-blockchain, konsensus, UTXO, multisig, segwit, Merkle tree, Bloom filters, proof-of-work vs. proof-of-stake, lightning network
+
+## Blockchain
+
+## Konsenzus
+
+## UTXO
+
+## Multisig
+
+## Segwit
+
+## Merkle tree
+
+## Bloom filters
+
+## Proof-of-work vs. Proof-of-stake
+
+## Lightning network
+
 ( ..., taproot, coinjoin, smart contracts, DeFi, stablecoin, CBDC, zero-knowledge proofs, ... )
